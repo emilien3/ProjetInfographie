@@ -57,10 +57,10 @@ RM = /opt/homebrew/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /Users/emilien/Documents/workspace/cpp_workspace/Projet_Infographie/Projet-basecode
+CMAKE_SOURCE_DIR = /Users/emilien/Documents/workspace/cpp_workspace/Projet_Infographie/ProjetInfographie
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /Users/emilien/Documents/workspace/cpp_workspace/Projet_Infographie/Projet-basecode/build
+CMAKE_BINARY_DIR = /Users/emilien/Documents/workspace/cpp_workspace/Projet_Infographie/ProjetInfographie/build
 
 #=============================================================================
 # Targets provided globally by CMake.
@@ -68,7 +68,7 @@ CMAKE_BINARY_DIR = /Users/emilien/Documents/workspace/cpp_workspace/Projet_Infog
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --cyan "Running CMake cache editor..."
-	/opt/homebrew/Cellar/cmake/3.30.3/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/opt/homebrew/bin/ccmake -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -87,9 +87,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/emilien/Documents/workspace/cpp_workspace/Projet_Infographie/Projet-basecode/build/CMakeFiles /Users/emilien/Documents/workspace/cpp_workspace/Projet_Infographie/Projet-basecode/build//CMakeFiles/progress.marks
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/emilien/Documents/workspace/cpp_workspace/Projet_Infographie/ProjetInfographie/build/CMakeFiles /Users/emilien/Documents/workspace/cpp_workspace/Projet_Infographie/ProjetInfographie/build//CMakeFiles/progress.marks
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /Users/emilien/Documents/workspace/cpp_workspace/Projet_Infographie/Projet-basecode/build/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /Users/emilien/Documents/workspace/cpp_workspace/Projet_Infographie/ProjetInfographie/build/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -230,6 +230,54 @@ src/stb_image.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/my-exec.dir/build.make CMakeFiles/my-exec.dir/src/stb_image.cpp.s
 .PHONY : src/stb_image.cpp.s
 
+src/vao.o: src/vao.cpp.o
+.PHONY : src/vao.o
+
+# target to build an object file
+src/vao.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/my-exec.dir/build.make CMakeFiles/my-exec.dir/src/vao.cpp.o
+.PHONY : src/vao.cpp.o
+
+src/vao.i: src/vao.cpp.i
+.PHONY : src/vao.i
+
+# target to preprocess a source file
+src/vao.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/my-exec.dir/build.make CMakeFiles/my-exec.dir/src/vao.cpp.i
+.PHONY : src/vao.cpp.i
+
+src/vao.s: src/vao.cpp.s
+.PHONY : src/vao.s
+
+# target to generate assembly for a file
+src/vao.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/my-exec.dir/build.make CMakeFiles/my-exec.dir/src/vao.cpp.s
+.PHONY : src/vao.cpp.s
+
+src/vbo.o: src/vbo.cpp.o
+.PHONY : src/vbo.o
+
+# target to build an object file
+src/vbo.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/my-exec.dir/build.make CMakeFiles/my-exec.dir/src/vbo.cpp.o
+.PHONY : src/vbo.cpp.o
+
+src/vbo.i: src/vbo.cpp.i
+.PHONY : src/vbo.i
+
+# target to preprocess a source file
+src/vbo.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/my-exec.dir/build.make CMakeFiles/my-exec.dir/src/vbo.cpp.i
+.PHONY : src/vbo.cpp.i
+
+src/vbo.s: src/vbo.cpp.s
+.PHONY : src/vbo.s
+
+# target to generate assembly for a file
+src/vbo.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/my-exec.dir/build.make CMakeFiles/my-exec.dir/src/vbo.cpp.s
+.PHONY : src/vbo.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -250,6 +298,12 @@ help:
 	@echo "... src/stb_image.o"
 	@echo "... src/stb_image.i"
 	@echo "... src/stb_image.s"
+	@echo "... src/vao.o"
+	@echo "... src/vao.i"
+	@echo "... src/vao.s"
+	@echo "... src/vbo.o"
+	@echo "... src/vbo.i"
+	@echo "... src/vbo.s"
 .PHONY : help
 
 

@@ -8,8 +8,10 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/Users/emilien/Documents/workspace/cpp_workspace/Projet_Infographie/Projet-basecode/src/main.cpp" "CMakeFiles/my-exec.dir/src/main.cpp.o" "gcc" "CMakeFiles/my-exec.dir/src/main.cpp.o.d"
-  "/Users/emilien/Documents/workspace/cpp_workspace/Projet_Infographie/Projet-basecode/src/stb_image.cpp" "CMakeFiles/my-exec.dir/src/stb_image.cpp.o" "gcc" "CMakeFiles/my-exec.dir/src/stb_image.cpp.o.d"
+  "/Users/emilien/Documents/workspace/cpp_workspace/Projet_Infographie/ProjetInfographie/src/main.cpp" "CMakeFiles/my-exec.dir/src/main.cpp.o" "gcc" "CMakeFiles/my-exec.dir/src/main.cpp.o.d"
+  "/Users/emilien/Documents/workspace/cpp_workspace/Projet_Infographie/ProjetInfographie/src/stb_image.cpp" "CMakeFiles/my-exec.dir/src/stb_image.cpp.o" "gcc" "CMakeFiles/my-exec.dir/src/stb_image.cpp.o.d"
+  "/Users/emilien/Documents/workspace/cpp_workspace/Projet_Infographie/ProjetInfographie/src/vao.cpp" "CMakeFiles/my-exec.dir/src/vao.cpp.o" "gcc" "CMakeFiles/my-exec.dir/src/vao.cpp.o.d"
+  "/Users/emilien/Documents/workspace/cpp_workspace/Projet_Infographie/ProjetInfographie/src/vbo.cpp" "CMakeFiles/my-exec.dir/src/vbo.cpp.o" "gcc" "CMakeFiles/my-exec.dir/src/vbo.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

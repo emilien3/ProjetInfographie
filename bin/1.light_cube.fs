@@ -1,1 +1,0 @@
-/Users/emilien/Documents/workspace/cpp_workspace/Projet_Infographie/Projet-basecode/src/1.light_cube.fs

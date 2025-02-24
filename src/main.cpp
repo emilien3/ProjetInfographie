@@ -77,8 +77,8 @@ int main()
 
     // build and compile our shader zprogram
     // ------------------------------------
-    Shader lightingShader("1.colors.vs", "1.colors.fs");
-    Shader lightCubeShader("1.light_cube.vs", "1.light_cube.fs");
+    Shader lightingShader("../shaders/1.colors.vs", "../shaders/1.colors.fs");
+    Shader lightCubeShader("../shaders/1.light_cube.vs", "../shaders/1.light_cube.fs");
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
@@ -125,9 +125,12 @@ int main()
         -0.5f,  0.5f,  0.5f, 
         -0.5f,  0.5f, -0.5f, 
     };
-    
     // first, configure the cube's VAO (and VBO)
+
+
     unsigned int VBO, cubeVAO;
+
+
     glGenVertexArrays(1, &cubeVAO);
     glGenBuffers(1, &VBO);
 

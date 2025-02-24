@@ -4,9 +4,9 @@
 # compile CXX with /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/System/Library/Frameworks -I/Users/emilien/Documents/workspace/cpp_workspace/Projet_Infographie/Projet-basecode/build/configuration -I/Users/emilien/Documents/workspace/cpp_workspace/Projet_Infographie/Projet-basecode/includes -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk/System/Library/Frameworks
+CXX_INCLUDES = -I/System/Library/Frameworks -I/Users/emilien/Documents/workspace/cpp_workspace/Projet_Infographie/ProjetInfographie/build/configuration -I/Users/emilien/Documents/workspace/cpp_workspace/Projet_Infographie/ProjetInfographie/includes -F/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk/System/Library/Frameworks
 
-CXX_FLAGSarm64 = -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk -mmacosx-version-min=15.1
+CXX_FLAGSarm64 = -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
 
-CXX_FLAGS = -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk -mmacosx-version-min=15.1
+CXX_FLAGS = -g -std=gnu++17 -arch arm64 -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.2.sdk
 
