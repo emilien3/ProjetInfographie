@@ -9,6 +9,10 @@
 #include <learnopengl/shader_m.h>
 #include <learnopengl/camera.h>
 
+#include "header/vao.hpp"
+#include "header/vbo.hpp"
+#include "header/ebo.hpp"
+
 #include <iostream>
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -35,6 +39,9 @@ glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 int main()
 {
+
+    /////////////////////// CONFIG ////////////////////////////
+    
     // glfw: initialize and configure
     // ------------------------------
     glfwInit();
@@ -74,89 +81,130 @@ int main()
     // configure global opengl state
     // -----------------------------
     glEnable(GL_DEPTH_TEST);
+    ////////////////////////////////////////////////////////////
+
+
+
+    ////////////////////// SHADERS /////////////////////////////
 
     // build and compile our shader zprogram
     // ------------------------------------
     Shader lightingShader("../shaders/1.colors.vs", "../shaders/1.colors.fs");
     Shader lightCubeShader("../shaders/1.light_cube.vs", "../shaders/1.light_cube.fs");
+    ////////////////////////////////////////////////////////////
+
+
+    //////////////////////// DATA ////////////////////////////
 
     // set up vertex data (and buffer(s)) and configure vertex attributes
     // ------------------------------------------------------------------
+
+    // float vertices[] = {
+    //     -0.5f, -0.5f, -0.5f, 
+    //      0.5f, -0.5f, -0.5f,  
+    //      0.5f,  0.5f, -0.5f,  
+    //      0.5f,  0.5f, -0.5f,  
+    //     -0.5f,  0.5f, -0.5f, 
+    //     -0.5f, -0.5f, -0.5f, 
+
+    //     -0.5f, -0.5f,  0.5f, 
+    //      0.5f, -0.5f,  0.5f,  
+    //      0.5f,  0.5f,  0.5f,  
+    //      0.5f,  0.5f,  0.5f,  
+    //     -0.5f,  0.5f,  0.5f, 
+    //     -0.5f, -0.5f,  0.5f, 
+
+    //     -0.5f,  0.5f,  0.5f, 
+    //     -0.5f,  0.5f, -0.5f, 
+    //     -0.5f, -0.5f, -0.5f, 
+    //     -0.5f, -0.5f, -0.5f, 
+    //     -0.5f, -0.5f,  0.5f, 
+    //     -0.5f,  0.5f,  0.5f, 
+
+    //      0.5f,  0.5f,  0.5f,  
+    //      0.5f,  0.5f, -0.5f,  
+    //      0.5f, -0.5f, -0.5f,  
+    //      0.5f, -0.5f, -0.5f,  
+    //      0.5f, -0.5f,  0.5f,  
+    //      0.5f,  0.5f,  0.5f,  
+
+    //     -0.5f, -0.5f, -0.5f, 
+    //      0.5f, -0.5f, -0.5f,  
+    //      0.5f, -0.5f,  0.5f,  
+    //      0.5f, -0.5f,  0.5f,  
+    //     -0.5f, -0.5f,  0.5f, 
+    //     -0.5f, -0.5f, -0.5f, 
+
+    //     -0.5f,  0.5f, -0.5f, 
+    //      0.5f,  0.5f, -0.5f,  
+    //      0.5f,  0.5f,  0.5f,  
+    //      0.5f,  0.5f,  0.5f,  
+    //     -0.5f,  0.5f,  0.5f, 
+    //     -0.5f,  0.5f, -0.5f, 
+    // };
+
     float vertices[] = {
         -0.5f, -0.5f, -0.5f, 
          0.5f, -0.5f, -0.5f,  
          0.5f,  0.5f, -0.5f,  
-         0.5f,  0.5f, -0.5f,  
         -0.5f,  0.5f, -0.5f, 
-        -0.5f, -0.5f, -0.5f, 
 
         -0.5f, -0.5f,  0.5f, 
          0.5f, -0.5f,  0.5f,  
          0.5f,  0.5f,  0.5f,  
-         0.5f,  0.5f,  0.5f,  
         -0.5f,  0.5f,  0.5f, 
-        -0.5f, -0.5f,  0.5f, 
-
-        -0.5f,  0.5f,  0.5f, 
-        -0.5f,  0.5f, -0.5f, 
-        -0.5f, -0.5f, -0.5f, 
-        -0.5f, -0.5f, -0.5f, 
-        -0.5f, -0.5f,  0.5f, 
-        -0.5f,  0.5f,  0.5f, 
-
-         0.5f,  0.5f,  0.5f,  
-         0.5f,  0.5f, -0.5f,  
-         0.5f, -0.5f, -0.5f,  
-         0.5f, -0.5f, -0.5f,  
-         0.5f, -0.5f,  0.5f,  
-         0.5f,  0.5f,  0.5f,  
-
-        -0.5f, -0.5f, -0.5f, 
-         0.5f, -0.5f, -0.5f,  
-         0.5f, -0.5f,  0.5f,  
-         0.5f, -0.5f,  0.5f,  
-        -0.5f, -0.5f,  0.5f, 
-        -0.5f, -0.5f, -0.5f, 
-
-        -0.5f,  0.5f, -0.5f, 
-         0.5f,  0.5f, -0.5f,  
-         0.5f,  0.5f,  0.5f,  
-         0.5f,  0.5f,  0.5f,  
-        -0.5f,  0.5f,  0.5f, 
-        -0.5f,  0.5f, -0.5f, 
     };
-    // first, configure the cube's VAO (and VBO)
 
 
-    unsigned int VBO, cubeVAO;
+    int indices[]{
+        0, 1, 2,
+        2, 3, 0,
+        4, 5, 6,
+        6, 7, 4,
+        7, 3, 0,
+        0, 4, 7,
+        6, 2, 1,
+        1, 5, 6,
+        0, 1, 5,
+        5, 4, 0,
+        3, 2, 6,
+        6, 7, 3
+    };
+
+    ////////////////////////////////////////////////////////////
 
 
-    glGenVertexArrays(1, &cubeVAO);
-    glGenBuffers(1, &VBO);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    ////////////////////// VAO, VBO, EBO ////////////////////////////
+    
+    VAO cubeVAO;
+    VAO lightCubeVAO;
+    
+    VBO vbo(vertices, sizeof(vertices));    
+    EBO ebo(indices, sizeof(indices));
 
-    glBindVertexArray(cubeVAO);
+    
+    cubeVAO.bind();
+    ebo.bind();
+    cubeVAO.linkAttrib(vbo);
+    cubeVAO.unbind();
+    
+    
+    lightCubeVAO.bind();
+    ebo.bind();
+    lightCubeVAO.linkAttrib(vbo);
+    lightCubeVAO.unbind();
 
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+    // unbind
+    vbo.unbind();
+    ebo.unbind();
 
-    // second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
-    unsigned int lightCubeVAO;
-    glGenVertexArrays(1, &lightCubeVAO);
-    glBindVertexArray(lightCubeVAO);
+    /////////////////////////////////////////////////////////////////
+    
 
-    // we only need to bind to the VBO (to link it with glVertexAttribPointer), no need to fill it; the VBO's data already contains all we need (it's already bound, but we do it again for educational purposes)
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-
-    // render loop
+    ////////////////////// RENDER LOOP ////////////////////////////
     // -----------
+
     while (!glfwWindowShouldClose(window))
     {
         // per-frame time logic
@@ -190,8 +238,9 @@ int main()
         lightingShader.setMat4("model", model);
 
         // render the cube
-        glBindVertexArray(cubeVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+        cubeVAO.bind();
+        // glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 
         // also draw the lamp object
@@ -203,8 +252,10 @@ int main()
         model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
         lightCubeShader.setMat4("model", model);
 
-        glBindVertexArray(lightCubeVAO);
-        glDrawArrays(GL_TRIANGLES, 0, 36);
+
+        lightCubeVAO.bind();
+        // glDrawArrays(GL_TRIANGLES, 0, 36);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -213,17 +264,22 @@ int main()
         glfwPollEvents();
     }
 
-    // optional: de-allocate all resources once they've outlived their purpose:
+    // de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
-    glDeleteVertexArrays(1, &cubeVAO);
-    glDeleteVertexArrays(1, &lightCubeVAO);
-    glDeleteBuffers(1, &VBO);
+    cubeVAO.del();
+    lightCubeVAO.del();
+    vbo.del();
+    ebo.del();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
     glfwTerminate();
     return 0;
 }
+
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
