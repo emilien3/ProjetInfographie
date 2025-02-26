@@ -18,9 +18,12 @@
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
+void shift_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void processInput(GLFWwindow *window);
 
-// settings
+void initPoints(std::vector<glm::vec3> &points);
+
+// screen settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
@@ -30,12 +33,18 @@ float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
+bool shiftMode = false;
+
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 // lighting
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+
+std::vector<glm::vec3> points;
+
+
 
 int main()
 {
@@ -66,6 +75,7 @@ int main()
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
+    glfwSetKeyCallback(window, shift_callback);
 
     // tell GLFW to capture our mouse
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -96,52 +106,8 @@ int main()
 
     //////////////////////// DATA ////////////////////////////
 
-    // set up vertex data (and buffer(s)) and configure vertex attributes
+    // set up vertex data (and buffer(s)) and indices
     // ------------------------------------------------------------------
-
-    // float vertices[] = {
-    //     -0.5f, -0.5f, -0.5f, 
-    //      0.5f, -0.5f, -0.5f,  
-    //      0.5f,  0.5f, -0.5f,  
-    //      0.5f,  0.5f, -0.5f,  
-    //     -0.5f,  0.5f, -0.5f, 
-    //     -0.5f, -0.5f, -0.5f, 
-
-    //     -0.5f, -0.5f,  0.5f, 
-    //      0.5f, -0.5f,  0.5f,  
-    //      0.5f,  0.5f,  0.5f,  
-    //      0.5f,  0.5f,  0.5f,  
-    //     -0.5f,  0.5f,  0.5f, 
-    //     -0.5f, -0.5f,  0.5f, 
-
-    //     -0.5f,  0.5f,  0.5f, 
-    //     -0.5f,  0.5f, -0.5f, 
-    //     -0.5f, -0.5f, -0.5f, 
-    //     -0.5f, -0.5f, -0.5f, 
-    //     -0.5f, -0.5f,  0.5f, 
-    //     -0.5f,  0.5f,  0.5f, 
-
-    //      0.5f,  0.5f,  0.5f,  
-    //      0.5f,  0.5f, -0.5f,  
-    //      0.5f, -0.5f, -0.5f,  
-    //      0.5f, -0.5f, -0.5f,  
-    //      0.5f, -0.5f,  0.5f,  
-    //      0.5f,  0.5f,  0.5f,  
-
-    //     -0.5f, -0.5f, -0.5f, 
-    //      0.5f, -0.5f, -0.5f,  
-    //      0.5f, -0.5f,  0.5f,  
-    //      0.5f, -0.5f,  0.5f,  
-    //     -0.5f, -0.5f,  0.5f, 
-    //     -0.5f, -0.5f, -0.5f, 
-
-    //     -0.5f,  0.5f, -0.5f, 
-    //      0.5f,  0.5f, -0.5f,  
-    //      0.5f,  0.5f,  0.5f,  
-    //      0.5f,  0.5f,  0.5f,  
-    //     -0.5f,  0.5f,  0.5f, 
-    //     -0.5f,  0.5f, -0.5f, 
-    // };
 
     float vertices[] = {
         -0.5f, -0.5f, -0.5f, 
@@ -154,7 +120,6 @@ int main()
          0.5f,  0.5f,  0.5f,  
         -0.5f,  0.5f,  0.5f, 
     };
-
 
     int indices[]{
         0, 1, 2,
@@ -170,31 +135,22 @@ int main()
         3, 2, 6,
         6, 7, 3
     };
-
     ////////////////////////////////////////////////////////////
-
 
 
     ////////////////////// VAO, VBO, EBO ////////////////////////////
     
     VAO cubeVAO;
-    VAO lightCubeVAO;
     
     VBO vbo(vertices, sizeof(vertices));    
     EBO ebo(indices, sizeof(indices));
 
-    
+
     cubeVAO.bind();
     ebo.bind();
     cubeVAO.linkAttrib(vbo);
     cubeVAO.unbind();
     
-    
-    lightCubeVAO.bind();
-    ebo.bind();
-    lightCubeVAO.linkAttrib(vbo);
-    lightCubeVAO.unbind();
-
     // unbind
     vbo.unbind();
     ebo.unbind();
@@ -239,11 +195,10 @@ int main()
 
         // render the cube
         cubeVAO.bind();
-        // glDrawArrays(GL_TRIANGLES, 0, 36);
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 
-        // also draw the lamp object
+        // also draw the lamp object -> the smaller cube
         lightCubeShader.use();
         lightCubeShader.setMat4("projection", projection);
         lightCubeShader.setMat4("view", view);
@@ -251,12 +206,8 @@ int main()
         model = glm::translate(model, lightPos);
         model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
         lightCubeShader.setMat4("model", model);
-
-
-        lightCubeVAO.bind();
-        // glDrawArrays(GL_TRIANGLES, 0, 36);
+        cubeVAO.bind();
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
@@ -267,12 +218,15 @@ int main()
     // de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
     cubeVAO.del();
-    lightCubeVAO.del();
     vbo.del();
     ebo.del();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
+    // === Nettoyage ===
+
+    glfwDestroyWindow(window);
+    
     glfwTerminate();
     return 0;
 }
@@ -312,23 +266,25 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 // -------------------------------------------------------
 void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 {
-    float xpos = static_cast<float>(xposIn);
-    float ypos = static_cast<float>(yposIn);
+    if (!shiftMode){
+        float xpos = static_cast<float>(xposIn);
+        float ypos = static_cast<float>(yposIn);
 
-    if (firstMouse)
-    {
+        if (firstMouse)
+        {
+            lastX = xpos;
+            lastY = ypos;
+            firstMouse = false;
+        }
+
+        float xoffset = xpos - lastX;
+        float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
+
         lastX = xpos;
         lastY = ypos;
-        firstMouse = false;
+
+        camera.ProcessMouseMovement(xoffset, yoffset);
     }
-
-    float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed since y-coordinates go from bottom to top
-
-    lastX = xpos;
-    lastY = ypos;
-
-    camera.ProcessMouseMovement(xoffset, yoffset);
 }
 
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
@@ -336,4 +292,28 @@ void mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     camera.ProcessMouseScroll(static_cast<float>(yoffset));
+}
+
+void shift_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
+
+    // GLFW_MOD_SHIFT; how to use that ? 
+
+    if( (((key == GLFW_KEY_LEFT_SHIFT) || (key == GLFW_KEY_RIGHT_SHIFT)) && (action == GLFW_PRESS)))
+    {
+        if (!shiftMode){
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            shiftMode = true;
+        }
+        else
+        {
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            shiftMode = false;
+        }   
+    }
+}
+
+void initPoints(std::vector<glm::vec3> &points){
+
+    // test avec 2 points
+
 }
