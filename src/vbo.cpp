@@ -1,4 +1,5 @@
 #include <glad/glad.h>
+
 #include "header/vbo.hpp"
 
 
@@ -7,6 +8,14 @@ VBO::VBO(const float *vertices, size_t size)
     glGenBuffers(1, &id);
     bind();
     glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
+}
+
+
+VBO::VBO(std::vector<glm::vec3> &points, size_t size)
+{
+    glGenBuffers(1, &id);
+    bind();
+    glBufferData(GL_ARRAY_BUFFER, size * sizeof(glm::vec3), points.data(), GL_DYNAMIC_DRAW);
 }
 
 void VBO::bind()

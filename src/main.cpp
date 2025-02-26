@@ -1,3 +1,7 @@
+#include "../imgui/imgui.h"
+#include "../imgui/imgui_impl_glfw.h"
+#include "../imgui/imgui_impl_opengl3.h"
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -12,6 +16,8 @@
 #include "header/vao.hpp"
 #include "header/vbo.hpp"
 #include "header/ebo.hpp"
+
+#include "header/utils.cpp"
 
 #include <iostream>
 
@@ -42,8 +48,11 @@ float lastFrame = 0.0f;
 // lighting
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
-std::vector<glm::vec3> points;
+std::vector<glm::vec3> beziersPoints;
+std::vector<glm::vec3> controlPoints;
 
+
+int nbpoints = 2;
 
 
 int main()
@@ -155,8 +164,42 @@ int main()
     vbo.unbind();
     ebo.unbind();
 
+    initPoints(beziersPoints);
+
+    VAO dotVAO;
+    VBO dotVBO(beziersPoints, beziersPoints.size());
+
+    dotVAO.bind();
+    dotVAO.linkAttrib(dotVBO);
+    dotVAO.unbind();
+    dotVBO.unbind();
+
+
     /////////////////////////////////////////////////////////////////
     
+    // printpoints = points.data();
+
+
+    for (auto i : beziersPoints)
+    {
+
+        std::cout << i.x << std::endl;
+
+    }
+    
+    
+    printPascalTriangles(7);
+
+    ////////////////////// IMGUI /////////////////////////////
+	
+	IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGui::StyleColorsDark();
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
+	///////////////////////////////////////////////////////////////
+
 
     ////////////////////// RENDER LOOP ////////////////////////////
     // -----------
@@ -177,6 +220,11 @@ int main()
         // ------
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // render imgui windows
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
         
         // be sure to activate shader when setting uniforms/drawing objects
         lightingShader.use();
@@ -193,9 +241,16 @@ int main()
         glm::mat4 model = glm::mat4(1.0f);
         lightingShader.setMat4("model", model);
 
-        // render the cube
-        cubeVAO.bind();
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
+
+        //////////////////////////////////////////////////////////
+        /////////////////////
+        ////// CUBE /////////
+        /////////////////////
+
+        // // render the cube
+        // cubeVAO.bind();
+        // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
 
         // also draw the lamp object -> the smaller cube
@@ -209,15 +264,54 @@ int main()
         cubeVAO.bind();
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
+        //////////////////////////////////////////////////////////
+
+
+
+
+        //////////////////// DOT RENDER ///////////////////////
+
+        // mise à jour du vbo
+        // ........
+
+        glPointSize(10.f);
+
+        // Rendu des points
+        dotVAO.bind();
+        glDrawArrays(GL_POINTS, 0, 2);
+        dotVAO.unbind();
+
+        ///////////////////////////////////////////////////////
+
+
+        ///// rendu de la fenetre
+
+        ImGui::Begin("My Window");
+        ImGui::Text("Hello Boyy");
+        ImGui::End();
+
+        ImGui::Render();
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
+
+
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
 
+    //// DELETE IMGUI //////
+
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
+
     // de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
     cubeVAO.del();
+    dotVAO.del();
+    dotVBO.del();
     vbo.del();
     ebo.del();
 
@@ -250,6 +344,15 @@ void processInput(GLFWwindow *window)
         camera.ProcessKeyboard(LEFT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
+
+    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS){
+        nbpoints = std::min(200, nbpoints + 1);
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS){
+        nbpoints = std::max(2, nbpoints - 1);
+    }
+    
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -315,5 +418,11 @@ void shift_callback(GLFWwindow* window, int key, int scancode, int action, int m
 void initPoints(std::vector<glm::vec3> &points){
 
     // test avec 2 points
-
+    glm::vec3 v1(1.f, 1.f, 1.f);
+    glm::vec3 v2(-1.f, -1.f, -1.f);
+    points.push_back(v1);
+    points.push_back(v2);
 }
+
+
+

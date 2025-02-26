@@ -75,6 +75,7 @@ endmacro()
             "src/*.cpp"
             "src/*.vs"
             "src/*.fs"
+            "imgui/*.cpp"
       )
 set(NAME "my-exec")
 
@@ -119,4 +120,4 @@ set(NAME "my-exec")
         configure_file(${CMAKE_SOURCE_DIR}/configuration/visualstudio.vcxproj.user.in ${CMAKE_CURRENT_BINARY_DIR}/${NAME}.vcxproj.user @ONLY)
     endif(MSVC)
 
-include_directories(${CMAKE_SOURCE_DIR}/includes)
+include_directories(${CMAKE_SOURCE_DIR}/includes imgui/*.h)
