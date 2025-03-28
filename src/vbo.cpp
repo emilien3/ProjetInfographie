@@ -2,6 +2,7 @@
 
 #include "header/vbo.hpp"
 
+VBO::VBO(){}
 
 VBO::VBO(const float *vertices, size_t size)
 {

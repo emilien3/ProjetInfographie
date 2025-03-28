@@ -1,7 +1,6 @@
 #include <glad/glad.h>
 #include "header/vao.hpp"
 
-
 VAO::VAO(){
     glGenVertexArrays(1, &id);
 }

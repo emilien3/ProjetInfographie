@@ -1,10 +1,10 @@
 cmake_minimum_required (VERSION 3.0)
 cmake_policy(VERSION 3.0)
 
-project(ProjetInfographieMA)
+project(ProjetInfographieM1)
 
 set(CMAKE_CXX_STANDARD 17) # this does nothing for MSVC, use target_compile_options below
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS ON)
 
 IF(NOT CMAKE_BUILD_TYPE)
@@ -52,12 +52,17 @@ elseif(APPLE)
   SET(APPLE_LIBS ${COCOA_LIBRARY} ${IOKit_LIBRARY} ${OpenGL_LIBRARY} ${CoreVideo_LIBRARY})
   SET(APPLE_LIBS ${APPLE_LIBS} ${GLFW3_LIBRARY} ${ASSIMP_LIBRARY} ${FREETYPE_LIBRARIES})
   set(LIBS ${LIBS} ${APPLE_LIBS})
+  add_definitions(-DGLFW_EXPOSE_NATIVE_COCOA -DGLFW_EXPOSE_NATIVE_NSGL)
+
 else()
   set(LIBS )
 endif(WIN32)
 
 configure_file(configuration/root_directory.h.in configuration/root_directory.h)
 include_directories(${CMAKE_BINARY_DIR}/configuration)
+
+include_directories()
+
 
 # first create relevant static libraries required for other projects
 add_library(STB_IMAGE "src/stb_image.cpp")
@@ -73,10 +78,11 @@ endmacro()
 	file(GLOB SOURCE
             "src/*.h"
             "src/*.cpp"
-            "src/*.vs"
-            "src/*.fs"
+            "shaders/*.vs"
+            "shaders/*.fs"
             "imgui/*.cpp"
       )
+
 set(NAME "my-exec")
 
     add_executable(${NAME} ${SOURCE})
@@ -97,8 +103,8 @@ set(NAME "my-exec")
     endif(WIN32)
     # copy shader files to build directory
     file(GLOB SHADERS
-             "src/*.vs"
-             "src/*.fs"
+             "shaders/*.vs"
+             "shaders/*.fs"
             )
 	# copy dlls
 	file(GLOB DLLS "dlls/*.dll")
@@ -121,3 +127,4 @@ set(NAME "my-exec")
     endif(MSVC)
 
 include_directories(${CMAKE_SOURCE_DIR}/includes imgui/*.h)
+file(GLOB SOURCES "imgui/*.cpp")
