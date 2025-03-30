@@ -1,8 +1,6 @@
 #include "header/controlPoint.hpp"
 #include "header/utils.hpp"
 
-
-
 controlPoint::controlPoint(int i)
 {   
     if (i==1)
@@ -31,7 +29,6 @@ std::vector<glm::vec3> controlPoint::getListPoint()
 {
     return listPoint;
 }
-
 
 VAO controlPoint::getVAO()
 {

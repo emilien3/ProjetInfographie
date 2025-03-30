@@ -32,8 +32,6 @@ controlPoint courbeBezier::getControlPoint()
 
 void courbeBezier::renduPointControl(){
     // Rendu des points
-
-
     controlPoints.getVAO().bind();
     // dernier elem est le nombre de points de controle
     glDrawArrays(GL_POINTS, 0, 4);
@@ -44,7 +42,6 @@ void courbeBezier::renduPointControl(){
 void courbeBezier::renduCourbeBezier(){
 
     // bezierVAO.bind();
-
     vao.bind();
     if (previousnbpoints != nbpoints)
     {

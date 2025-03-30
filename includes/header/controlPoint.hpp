@@ -1,5 +1,4 @@
 #pragma once
-#include <iostream>
 
 //OPENGL libs
 #include <glad/glad.h>
@@ -10,9 +9,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <iostream>
+
 #include "header/vao.hpp"
 #include "header/vbo.hpp"
-
 
 class controlPoint
 {

@@ -31,17 +31,15 @@ private:
 
 public:
 
-    int nbpoints = 4;
 
     courbeBezier(int i);
-    int getNbPoint();
-
-    controlPoint getControlPoint();
-
-    void renduPointControl();
-
-    void renduCourbeBezier();
-
     ~courbeBezier();
-};
 
+    int nbpoints = 4;    
+    
+    void renduPointControl();
+    void renduCourbeBezier();
+    
+    controlPoint getControlPoint();
+    int getNbPoint();
+};
