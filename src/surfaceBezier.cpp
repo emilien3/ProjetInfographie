@@ -34,17 +34,16 @@ void surfaceBezier::renduSurfaceBezier(){
 
     if ((previousN != n) || (previousM != m))
     {
+        //actualisation du nombre de points de la courbe de beziers
+        previousN = n;
+        previousM = m;
+        bezierSurface(controlPoints.getListPoint(), surface, n, m, tailleList1, tailleList2);
         updateIndices();
-        ebo.bind();
+        vbo.bind();// Mettre à jour le VBO avec les nouveaux points
+        glBufferData(GL_ARRAY_BUFFER, surface.size() * sizeof(glm::vec3), surface.data(), GL_DYNAMIC_DRAW);
+        vbo.unbind();
 
-        // //actualisation du nombre de points de la courbe de beziers
-        // previousN = n;
-        // previousM = m;
-        // bezierSurface(controlPoints.getListPoint(), surface, n, m, tailleList1, tailleList2);
-        // vbo.bind();// Mettre à jour le VBO avec les nouveaux points
-        // glBufferData(GL_ARRAY_BUFFER, surface.size() * sizeof(glm::vec3), surface.data(), GL_DYNAMIC_DRAW);
-        // vbo.unbind();
-    // }
+        ebo.bind();
 
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
     }

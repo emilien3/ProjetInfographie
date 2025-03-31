@@ -154,3 +154,19 @@ std::vector<glm::vec3> concate2list(std::vector<glm::vec3> list1, std::vector<gl
     }
     return surface;
 }
+
+
+// std::vector<glm::vec3> concate2list(std::vector<glm::vec3> list1, std::vector<glm::vec3> list2) {
+//     std::vector<glm::vec3> surface;
+//     for(int j = 0; j < list2.size(); j++) {
+//         for(int i = 0; i < list1.size(); i++) {
+//             glm::vec3 point(
+//                 list1[i].x, 
+//                 list2[j].y, 
+//                 (list1[i].z + list2[j].z)/2.0f
+//             );
+//             surface.push_back(point);
+//         }
+//     }
+//     return surface;
+// }
