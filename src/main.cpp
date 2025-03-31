@@ -13,7 +13,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-
 //learnopengl libs
 #include <learnopengl/filesystem.h>
 #include <learnopengl/shader_m.h>
@@ -113,14 +112,14 @@ int main()
     std::vector<glm::vec3> liste1;
     std::vector<glm::vec3> liste2;
     
-    initControlPoints1(liste1);
-    initControlPoints2(liste2);
+    initControlPoints3(liste1);
+    initControlPoints4(liste2);
     
-    courbeBezier courbe1(liste1);
-    courbeBezier courbe2(liste2);
+    // courbeBezier courbe1(liste1);
+    // courbeBezier courbe2(liste2);
     
-    // std::vector<glm::vec3> surface = concate2list(liste1, liste2);
-    // surfaceBezier maSurface(liste1, liste2);
+    std::vector<glm::vec3> surface = concate2list(liste1, liste2);
+    surfaceBezier maSurface(surface, liste1.size(), liste2.size(), 20, 20);
     
     // std::cout << "Type de surface : " << typeid(surface).name() << std::endl;
     // for (auto &&i : surface)
@@ -134,8 +133,6 @@ int main()
     // {
     //     std::cout << i.x << i.y << i.z << std::endl; 
     // }
-    
-
 
     ////////////////////// SHADERS /////////////////////////////
 
@@ -271,18 +268,21 @@ int main()
 
         // // Rendu des points
 
-        courbe1.renduPointControl();
-        courbe2.renduPointControl();
+        // courbe1.renduPointControl();
+        // courbe2.renduPointControl();
 
-        courbe1.renduCourbeBezier();
-        courbe2.renduCourbeBezier();
+        // courbe1.renduCourbeBezier();
+        // courbe2.renduCourbeBezier();
 
+
+        
         // Rendu des points
         // maSurface.getControlPoint().getVAO().bind(); // test
         // // dernier elem est le nombre de points de controle
         // glDrawArrays(GL_POINTS, 0, maSurface.getControlPoint().getListPoint().size());
         // maSurface.getControlPoint().getVAO().unbind();
-
+        
+        maSurface.renduSurfaceBezier();
         
 
         ///////////////////////////////////////////////////////
@@ -297,18 +297,27 @@ int main()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // Créez toutes les fenêtres ImGui ici
-        ImGui::Begin("Fenêtre 1");
-        ImGui::SliderInt("Points Courbe 1", &courbe1.nbpoints, 2, 30);
+        // // Créez toutes les fenêtres ImGui ici
+        // ImGui::Begin("Fenêtre 1");
+        // ImGui::SliderInt("Points Courbe 1", &courbe1.nbpoints, 2, 30);
+        // ImGui::End();
+
+        // ImGui::Begin("Fenêtre 2");
+        // ImGui::SliderInt("Points Courbe 2", &courbe2.nbpoints, 2, 30);
+        // ImGui::End();
+
+        ImGui::Begin("Surface Settings");
+        ImGui::SliderInt("Resolution U", &maSurface.n, 2, 50);
+        ImGui::SliderInt("Resolution V", &maSurface.m, 2, 50);
         ImGui::End();
 
-        ImGui::Begin("Fenêtre 2");
-        ImGui::SliderInt("Points Courbe 2", &courbe2.nbpoints, 2, 30);
-        ImGui::End();
 
         // Effectuez le rendu ImGui une seule fois
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+
+
         ///////////////////////////////////////////////////////
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

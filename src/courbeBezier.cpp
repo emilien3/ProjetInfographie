@@ -4,9 +4,7 @@
 courbeBezier::courbeBezier(const std::vector<glm::vec3> &list)
     : controlPoints(list) //initialisation directe
 {
-    initBezierPoints(beziersPoints, controlPoints.getListPoint(), courbe, nbpoints);
-    // vbo = VBO(courbe, courbe.size());
-
+    bezierCourbes(controlPoints.getListPoint(), courbe, nbpoints);
     vbo.bind();
     glBufferData(GL_ARRAY_BUFFER, courbe.size() * sizeof(glm::vec3), courbe.data(), GL_DYNAMIC_DRAW);
 
@@ -52,13 +50,11 @@ void courbeBezier::renduCourbeBezier(){
     {
         //actualisation du nombre de points de la courbe de beziers
         previousnbpoints = nbpoints;
-        initBezierPoints(beziersPoints, controlPoints.getListPoint(), courbe, nbpoints);
-
+        bezierCourbes(controlPoints.getListPoint(), courbe, nbpoints);
         // /// TEST
         // vbo.bind();
         // vbo = VBO(courbe, courbe.size());
         // ///
-
         vbo.bind();// Mettre à jour le VBO avec les nouveaux points
         glBufferData(GL_ARRAY_BUFFER, courbe.size() * sizeof(glm::vec3), courbe.data(), GL_DYNAMIC_DRAW);
         vbo.unbind();

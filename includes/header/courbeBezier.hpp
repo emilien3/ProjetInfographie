@@ -14,7 +14,6 @@
 #include "header/vao.hpp"
 #include "header/vbo.hpp"
 
-
 class courbeBezier
 {
 private:

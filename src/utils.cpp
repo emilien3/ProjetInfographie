@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <glm/glm.hpp>
+#include "header/utils.hpp"
 
 float binomialCoeff(int n, int k)
 {
@@ -30,29 +31,60 @@ float bernsteinPolynome(float u, int n, int i)
 
     return C_ni * u_i * sous;
 }
+
 float bernsteinPolynome2D(float u, int n, int i, float v, int m, int j)
 {
     return bernsteinPolynome(u, n, i) * bernsteinPolynome(v, m, j);
 }
 
-// n la taille du vecteur attendu
-// u entre 0 et 1
-void bezierCourbes(const std::vector<float> &bezierPoints, const std::vector<glm::vec3> &controlPoints, std::vector<glm::vec3> &courbe)
+void bezierCourbes(const std::vector<glm::vec3> &controlPoints, std::vector<glm::vec3> &courbe, int n)
 {
-    int n = controlPoints.size();
+    courbe.resize(n);
+    int nbControlPoints = controlPoints.size();
     // pour l'ensemble de mes u
-    for (int k = 0; k < bezierPoints.size(); k++)
+    for (int k = 0; k < n; k++)
     {
-        float u = bezierPoints[k];
+        float u = k/float(n-1);
         courbe[k] = glm::vec3(0.f);
         for (int i = 0; i < controlPoints.size(); i++)
         {
-            float B_n_i = bernsteinPolynome(u, n-1, i);
+            float B_n_i = bernsteinPolynome(u, nbControlPoints-1, i);
             courbe[k] += B_n_i*controlPoints[i];
         }
     }    
 }
 
+// (float u, int n, int i, float v, int m, int j)
+
+void bezierSurface(const std::vector<glm::vec3> &controlPoints,
+                std::vector<glm::vec3> &surface,
+                int n, int m, int nbControlPoints1, int nbControlPoints2)
+{
+    surface.clear();
+    surface.resize(n*m);
+    for (int k = 0; k < n; k++)
+    {
+        float u = k/float(n-1);
+        for (int l = 0; l < m; l++)
+        {
+            float v = l/float(m-1);
+            glm::vec3 vec(0.f);
+
+            for (int i = 0; i < nbControlPoints1; i++)
+            {
+                for (int j= 0; j < nbControlPoints2; j++ )
+                {
+                    float B_n_i_m_j = bernsteinPolynome2D(
+                        u, nbControlPoints1-1, i, 
+                        v, nbControlPoints2-1, j
+                    );
+                    vec += B_n_i_m_j*controlPoints[ i * nbControlPoints2 + j];
+                }
+            }
+            surface[k * m +l] = vec;
+        }
+    }    
+}
 
 void initControlPoints1(std::vector<glm::vec3> &points)
 {
@@ -78,18 +110,29 @@ void initControlPoints2(std::vector<glm::vec3> &points)
     points.push_back(v3);
 }
 
-void initBezierPoints(std::vector<float> &bezierPoints, const std::vector<glm::vec3> &controlPoints, std::vector<glm::vec3> &courbe, int n)
+
+void initControlPoints3(std::vector<glm::vec3> &points)
 {
-    //on fixe la taille à n
-    bezierPoints.clear();
-    
-    for (int i = 0 ; i < n; i++)
-    {
-        bezierPoints.push_back(i/float(n-1));
-    }
-    courbe.resize(bezierPoints.size());
-    
-    bezierCourbes(bezierPoints, controlPoints, courbe);
+    points.clear();
+    points = {
+        glm::vec3(-2.0f, 0.0f, -2.0f),
+        glm::vec3(-1.0f, 1.0f, -2.0f),
+        glm::vec3(0.0f, 0.0f, -2.0f),
+        glm::vec3(1.0f, -1.0f, -2.0f),
+        glm::vec3(2.0f, 0.0f, -2.0f)
+    };
+}
+
+void initControlPoints4(std::vector<glm::vec3> &points)
+{
+    points.clear();
+    points = {
+        glm::vec3(-2.0f, 0.0f, 2.0f),
+        glm::vec3(-1.0f, 1.0f, 2.0f),
+        glm::vec3(0.0f, 0.0f, 2.0f),
+        glm::vec3(1.0f, -1.0f, 2.0f),
+        glm::vec3(2.0f, 0.0f, 2.0f)
+    };
 }
 
 std::vector<glm::vec3> concate2list(std::vector<glm::vec3> list1, std::vector<glm::vec3> list2)
@@ -102,8 +145,11 @@ std::vector<glm::vec3> concate2list(std::vector<glm::vec3> list1, std::vector<gl
 
         for(int i = 1; i < list1.size(); i++)
         {
-            glm::vec3 v1(list1[i].x, list2[j].y, floorf((list1[i].z+list2[j].z)/2));
-            surface.push_back(v1);
+            glm::vec3 point(list1[i].x,
+                        list2[j].y, 
+                        (list1[i].z+list2[j].z)/2.0f
+            );
+            surface.push_back(point);
         } 
     }
     return surface;
