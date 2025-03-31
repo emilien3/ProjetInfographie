@@ -25,11 +25,11 @@ private:
 public:
 
     controlPoint() = delete;
-    controlPoint(int i);
+    controlPoint(const std::vector<glm::vec3> &list);
     ~controlPoint();
 
-    std::vector<glm::vec3> getListPoint();
+    const std::vector<glm::vec3>& getListPoint() const;
 
-    VAO getVAO();
-    VBO getVBO();
+    VAO& getVAO();
+    VBO& getVBO();
 };

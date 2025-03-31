@@ -1,22 +1,13 @@
 #include "header/controlPoint.hpp"
 #include "header/utils.hpp"
 
-controlPoint::controlPoint(int i)
+controlPoint::controlPoint(const std::vector<glm::vec3> &list) :
+listPoint(list), vbo(listPoint, listPoint.size())
 {   
-    if (i==1)
-    {
-        initControlPoints1(listPoint);
-    }
-    else if (i == 2)
-    {
-        initControlPoints2(listPoint);
-    }
-
-    vbo = VBO(listPoint, listPoint.size());
     vao.bind();
     vao.linkAttrib(vbo);
     vao.unbind();
-    vbo.unbind();  
+    vbo.unbind();
 }
 
 controlPoint::~controlPoint()
@@ -25,17 +16,17 @@ controlPoint::~controlPoint()
     vbo.del();
 }
 
-std::vector<glm::vec3> controlPoint::getListPoint()
+const std::vector<glm::vec3>& controlPoint::getListPoint() const
 {
     return listPoint;
 }
 
-VAO controlPoint::getVAO()
+VAO& controlPoint::getVAO()
 {
     return vao; 
 }
 
-VBO controlPoint::getVBO()
+VBO& controlPoint::getVBO()
 {
     return vbo;
 }

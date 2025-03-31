@@ -12,6 +12,9 @@ class VBO {
         unsigned int id;
 
     public :
+        
+        VBO(const VBO&) = delete;
+        VBO& operator=(const VBO&) = delete;
 
         VBO();
         VBO(const float *vertices, size_t size);

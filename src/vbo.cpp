@@ -2,7 +2,9 @@
 
 #include "header/vbo.hpp"
 
-VBO::VBO(){}
+VBO::VBO(){
+    glGenBuffers(1, &id);
+}
 
 VBO::VBO(const float *vertices, size_t size)
 {

@@ -30,6 +30,9 @@
 
 #include "header/controlPoint.hpp"
 #include "header/courbeBezier.hpp"
+#include "header/surfaceBezier.hpp"
+
+#include "header/utils.hpp"
 
 // #include "header/glfwWindow.hpp"
 
@@ -107,18 +110,29 @@ int main()
     glEnable(GL_DEPTH_TEST);
     ////////////////////////////////////////////////////////////
 
-    courbeBezier courbe1(1);
-    courbeBezier courbe2(2);
-
-
+    std::vector<glm::vec3> liste1;
+    std::vector<glm::vec3> liste2;
     
-    // std::__1::vector<glm::vec3> test = courbe2.getControlPoint().getListPoint();
-    // std::cout << "Type de test : " << typeid(test).name() << std::endl;
-
-    // for (auto &&i : test)
+    initControlPoints1(liste1);
+    initControlPoints2(liste2);
+    
+    courbeBezier courbe1(liste1);
+    courbeBezier courbe2(liste2);
+    
+    // std::vector<glm::vec3> surface = concate2list(liste1, liste2);
+    // surfaceBezier maSurface(liste1, liste2);
+    
+    // std::cout << "Type de surface : " << typeid(surface).name() << std::endl;
+    // for (auto &&i : surface)
     // {
     //     std::cout << i.x << i.y << i.z << std::endl; 
+    // }
 
+    // std::vector<glm::vec3> testing = maSurface.getControlPoint().getListPoint();
+    // std::cout << "Type de surface from object ma surface : " << typeid(surface).name() << std::endl;
+    // for (auto &&i : surface)
+    // {
+    //     std::cout << i.x << i.y << i.z << std::endl; 
     // }
     
 
@@ -250,6 +264,7 @@ int main()
         // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
         
         //////////////////////////////////////////////////////////
+        lightingShader.use();
         
         //////////////////// CONTROL DOT RENDER ///////////////////////
         glPointSize(10.f);
@@ -259,34 +274,41 @@ int main()
         courbe1.renduPointControl();
         courbe2.renduPointControl();
 
-        lightingShader.use();
-
-        // Rendu des courbes
         courbe1.renduCourbeBezier();
         courbe2.renduCourbeBezier();
+
+        // Rendu des points
+        // maSurface.getControlPoint().getVAO().bind(); // test
+        // // dernier elem est le nombre de points de controle
+        // glDrawArrays(GL_POINTS, 0, maSurface.getControlPoint().getListPoint().size());
+        // maSurface.getControlPoint().getVAO().unbind();
+
+        
 
         ///////////////////////////////////////////////////////
         
         //////////////////// IMGUI RENDERING ///////////////////////
         
         ///// rendu de la fenetre
+        // Dans la boucle de rendu (main.cpp) :
+
+        // Début du frame ImGui
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        ImGui::Begin("My Window");
-        ImGui::Text("Fenêtre de parametrage");
-        ImGui::SliderInt("int", &courbe1.nbpoints, 2, 30);
+
+        // Créez toutes les fenêtres ImGui ici
+        ImGui::Begin("Fenêtre 1");
+        ImGui::SliderInt("Points Courbe 1", &courbe1.nbpoints, 2, 30);
         ImGui::End();
-        ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
 
-
-
-        ImGui::NewFrame();
-        ImGui::Begin("My Window");
-        ImGui::Text("Fenêtre de parametrage");
-        ImGui::SliderInt("int", &courbe2.nbpoints, 2, 30);
+        ImGui::Begin("Fenêtre 2");
+        ImGui::SliderInt("Points Courbe 2", &courbe2.nbpoints, 2, 30);
         ImGui::End();
+
+        // Effectuez le rendu ImGui une seule fois
         ImGui::Render();
-        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         ///////////////////////////////////////////////////////
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)

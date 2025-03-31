@@ -19,7 +19,6 @@ class courbeBezier
 {
 private:
 
-    int curlVersion = 1;
     std::vector<float> beziersPoints;
     std::vector<glm::vec3> courbe;
 
@@ -31,8 +30,9 @@ private:
 
 public:
 
-
-    courbeBezier(int i);
+    courbeBezier() = delete;
+        
+    courbeBezier(const std::vector<glm::vec3> &list);
     ~courbeBezier();
 
     int nbpoints = 4;    
@@ -40,6 +40,6 @@ public:
     void renduPointControl();
     void renduCourbeBezier();
     
-    controlPoint getControlPoint();
+    controlPoint& getControlPoint();
     int getNbPoint();
 };
