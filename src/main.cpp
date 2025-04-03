@@ -30,6 +30,7 @@
 #include "header/controlPoint.hpp"
 #include "header/courbeBezier.hpp"
 #include "header/surfaceBezier.hpp"
+#include "header/sphere.hpp"
 
 #include "header/utils.hpp"
 
@@ -111,15 +112,23 @@ int main()
 
     std::vector<glm::vec3> liste1;
     std::vector<glm::vec3> liste2;
+    std::vector<glm::vec3> liste3;
+    std::vector<glm::vec3> liste4;
     
-    initControlPoints3(liste1);
-    initControlPoints4(liste2);
+    initControlPoints1(liste1);
+    initControlPoints2(liste2);
+
+    initControlPoints3(liste3);
+    initControlPoints4(liste4);
     
-    // courbeBezier courbe1(liste1);
-    // courbeBezier courbe2(liste2);
+    courbeBezier courbe1(liste3);
+    courbeBezier courbe2(liste4);
     
     std::vector<glm::vec3> surface = concate2list(liste1, liste2);
     surfaceBezier maSurface(surface, liste1.size(), liste2.size(), 20, 20);
+
+    sphere maSphere(36, 18, 1.f);
+
     
     // std::cout << "Type de surface : " << typeid(surface).name() << std::endl;
     // for (auto &&i : surface)
@@ -191,6 +200,25 @@ int main()
     vbo.unbind();
     ebo.unbind();
 
+    maSphere.renduSphere();
+
+    std::vector<glm::vec3>& sphereVertices = maSphere.getVertices();
+    std::vector<unsigned int>& sphereIndices = maSphere.getIndices();
+
+    VAO sphereVAO;
+    VBO sphereVBO(sphereVertices, sphereVertices.size());
+    EBO sphereEBO(sphereIndices.data(), sphereIndices.size() * sizeof(unsigned int));
+
+    sphereVAO.bind();
+    sphereVBO.bind();
+    sphereEBO.bind();
+
+    sphereVAO.linkAttrib(sphereVBO);
+    sphereVAO.unbind();
+    
+    sphereVBO.unbind();
+    sphereEBO.unbind();
+
 
     ////////////////////// IMGUI /////////////////////////////
 	IMGUI_CHECKVERSION();
@@ -238,6 +266,9 @@ int main()
 
         // world transformation
         glm::mat4 model = glm::mat4(1.0f);
+
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Position de la sphère
+
         lightingShader.setMat4("model", model);
 
         //////////////////////////////////////////////////////////
@@ -263,10 +294,10 @@ int main()
         //////////////////////////////////////////////////////////
         lightingShader.use();
         
-        //////////////////// CONTROL DOT RENDER ///////////////////////
+        //////////////////// ONTROL DOT RENDER ///////////////////////
         glPointSize(10.f);
 
-        // // Rendu des points
+        // Rendu des points
 
         // courbe1.renduPointControl();
         // courbe2.renduPointControl();
@@ -274,16 +305,26 @@ int main()
         // courbe1.renduCourbeBezier();
         // courbe2.renduCourbeBezier();
 
-
-        
         // Rendu des points
         // maSurface.getControlPoint().getVAO().bind(); // test
         // // dernier elem est le nombre de points de controle
         // glDrawArrays(GL_POINTS, 0, maSurface.getControlPoint().getListPoint().size());
         // maSurface.getControlPoint().getVAO().unbind();
         
-        maSurface.renduSurfaceBezier();
-        
+        // maSurface.renduSurfaceBezier();
+
+
+        sphereVAO.bind();
+
+        std::vector<unsigned int> &ind = maSphere.getIndices();
+
+        glDrawElements(GL_TRIANGLES,
+                        ind.size(),
+                        GL_UNSIGNED_INT,
+                        (void*)0);
+
+       sphereVAO.unbind();
+
 
         ///////////////////////////////////////////////////////
         
@@ -297,14 +338,11 @@ int main()
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // // Créez toutes les fenêtres ImGui ici
-        // ImGui::Begin("Fenêtre 1");
-        // ImGui::SliderInt("Points Courbe 1", &courbe1.nbpoints, 2, 30);
-        // ImGui::End();
-
-        // ImGui::Begin("Fenêtre 2");
-        // ImGui::SliderInt("Points Courbe 2", &courbe2.nbpoints, 2, 30);
-        // ImGui::End();
+        // Créez toutes les fenêtres ImGui ici
+        ImGui::Begin("Fenêtre 1");
+        ImGui::SliderInt("Points Courbe 1", &courbe1.nbpoints, 2, 30);
+        ImGui::SliderInt("Points Courbe 2", &courbe2.nbpoints, 2, 30);
+        ImGui::End();
 
         ImGui::Begin("Surface Settings");
         ImGui::SliderInt("Resolution U", &maSurface.n, 2, 50);

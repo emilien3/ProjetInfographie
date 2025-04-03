@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 
 
 class EBO {
@@ -10,7 +11,7 @@ class EBO {
 
         EBO()= default;
         EBO(const int *indices, size_t size);
-
+        EBO(std::vector<int> * indices, size_t size);
         EBO(const unsigned int* indices, size_t size);
         void bind();
         void unbind();
