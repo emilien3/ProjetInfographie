@@ -7,19 +7,23 @@ class surfaceBezier
 private:
 
     EBO ebo;
+    EBO triangleEBO;
     std::vector<unsigned int> indices;
+    std::vector<unsigned int> triangleIndices;
 
     controlPoint controlPoints;
     int tailleList1;
     int tailleList2;
     
     std::vector<glm::vec3> surface;
+    std::vector<glm::vec3> surfaceNormals;
     
     int previousN = 4;
     int previousM = 4;
     
     VAO vao;
     VBO vbo;
+    VBO normalVBO;
     
 public:
     
@@ -34,6 +38,14 @@ public:
     void renduSurfaceBezier();
 
     void updateIndices();
+
+    std::vector<glm::vec3>& getSurface();
+
+    void updateTriangleIndices();
+    void calculateSurfaceNormals();
+
+
+    const std::vector<unsigned int>& getTriangleIndices() const { return triangleIndices; } 
 
     ~surfaceBezier() = default;
 };

@@ -221,7 +221,7 @@ int main()
 
     std::vector<glm::vec3>& sphereVertices = maSphere.getVertices();
     std::vector<unsigned int>& sphereIndices = maSphere.getIndices();
-    std::vector<glm::vec3>& sphereNormals = maSphere.getNormales(); // Récupère les normales
+    std::vector<glm::vec3>& sphereNormals = maSphere.getNormales();
     
     VAO sphereVAO;
     VBO sphereVBO(sphereVertices, sphereVertices.size());
@@ -243,7 +243,6 @@ int main()
     ///////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////
-    
 
     ////////////////////// IMGUI /////////////////////////////
 	IMGUI_CHECKVERSION();
@@ -300,7 +299,6 @@ int main()
         cubeVAO.unbind();
         GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 
-        
         //////////////////////////////////////////////////////////
         Shader* currentSphereShader; // Pointeur vers le shader à utiliser
         if (showNormalsMode) {
@@ -328,8 +326,9 @@ int main()
         
         maSurface.renduSurfaceBezier();
 
+        std::vector<glm::vec3> pointsSurface = maSurface.getSurface();
         
-
+        // std::cout << " Ma surface contient " << pointsSurface.size() << " points" << std::endl;
 
         GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
         
@@ -344,10 +343,8 @@ int main()
         //unbind manuel de l'ebo
         GL_CHECK(sphereEBO.unbind());
         // GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
-            
-            
+
         ////////////////////Courbes, points de controles et rayons //////////////////////
-            
         // Color Shader param
         GL_CHECK(glPointSize(10.f));
         GL_CHECK(colorShader.use());
@@ -358,7 +355,6 @@ int main()
         GL_CHECK(colorShader.setMat4("model", model));
         GL_CHECK(colorShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f));
 
-
         GL_CHECK(colorShader.setVec3("objectColor", 1.0f, 1.0f, 0.0f));
         courbe1.renduPointControl();
         courbe2.renduPointControl();
@@ -367,12 +363,10 @@ int main()
         courbe1.renduCourbeBezier();
         courbe2.renduCourbeBezier();
         
-        
         GL_CHECK(colorShader.setVec3("objectColor", 1.0f, 0.0f, 0.0f));
         GL_CHECK(rayTraced.renduRay());
 
         //////////////////// IMGUI RENDERING ///////////////////////
-        
         ///// rendu de la fenetre
         // Dans la boucle de rendu (main.cpp) :
 
@@ -395,14 +389,12 @@ int main()
         // Effectuez le rendu ImGui une seule fois
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
         ///////////////////////////////////////////////////////
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
         glfwPollEvents();
-
     }
     
     //// DELETE IMGUI //////
@@ -429,7 +421,6 @@ int main()
     glfwTerminate();
     return 0;
 }
-
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////
