@@ -29,7 +29,6 @@ int courbeBezier::getNbPoint()
 controlPoint& courbeBezier::getControlPoint()
 {
     return controlPoints;
-    
 }
 
 void courbeBezier::renduPointControl(){

@@ -18,7 +18,10 @@ VBO::VBO(std::vector<glm::vec3> &points, size_t size)
 {
     glGenBuffers(1, &id);
     bind();
-    glBufferData(GL_ARRAY_BUFFER, size * sizeof(glm::vec3), points.data(), GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER,
+                size * sizeof(glm::vec3),
+                size > 0 ? points.data() : nullptr,
+                GL_DYNAMIC_DRAW);
 }
 
 void VBO::bind()

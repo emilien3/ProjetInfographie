@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include "header/utils.hpp"
 
+
 float binomialCoeff(int n, int k)
 {
     int res = 1;

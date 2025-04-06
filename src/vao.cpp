@@ -9,7 +9,13 @@ void VAO::linkAttrib(VBO& vbo){
     vbo.bind();
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
     glEnableVertexAttribArray(0);
-    vbo.unbind();
+    // vbo.unbind();
+}
+void VAO::linkAttrib(VBO& vbo, int components){
+    vbo.bind();
+    glVertexAttribPointer(0, (GLint)components, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+    glEnableVertexAttribArray(0);
+    // vbo.unbind();
 }
 
 void VAO::bind(){

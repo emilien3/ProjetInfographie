@@ -30,6 +30,7 @@ class VAO {
 
         VAO();
         void linkAttrib(VBO& vbo);
+        void linkAttrib(VBO& vbo, int sparse);
         void bind();
         void unbind();
         void del();

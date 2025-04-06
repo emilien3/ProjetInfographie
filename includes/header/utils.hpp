@@ -4,6 +4,23 @@
 #include <vector>
 #include <glm/glm.hpp>
 
+////////////////////////////////////////////////////////////////////////////////
+#include <glad/glad.h> // Assurez-vous que GLAD est inclus
+
+inline void checkOpenGLError(const char* stmt, const char* fname, int line) {
+    GLenum err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        std::cerr << "OpenGL error 0x" << std::hex << err << std::dec
+        << " at " << stmt
+        << " in " << fname << ":" << line << std::endl;
+    }
+}
+#define GL_CHECK(stmt) do { \
+    stmt; \
+    checkOpenGLError(#stmt, __FILE__, __LINE__); \
+} while (0)
+////////////////////////////////////////////////////////////////////////////////
+
 float binomialCoeff(int n, int k);
 
 void printPascalTriangles(int n);

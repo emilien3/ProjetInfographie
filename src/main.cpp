@@ -31,16 +31,18 @@
 #include "header/courbeBezier.hpp"
 #include "header/surfaceBezier.hpp"
 #include "header/sphere.hpp"
+#include "header/ray.hpp"
 
 #include "header/utils.hpp"
-
 // #include "header/glfwWindow.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void shift_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
-void processInput(GLFWwindow *window);
+void space_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void clear_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
+void processInput(GLFWwindow *window, ray& rayTraced);
 
 // screen settings
 const unsigned int SCR_WIDTH = 800;
@@ -53,6 +55,7 @@ float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
 
 bool shiftMode = false;
+bool spacePressedLastFrame = false;
 
 // timing
 float deltaTime = 0.0f;
@@ -60,6 +63,7 @@ float lastFrame = 0.0f;
 
 // lighting
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+
 
 int main()
 {
@@ -129,7 +133,9 @@ int main()
 
     sphere maSphere(36, 18, 1.f);
 
-    
+    // ray
+    ray rayTraced;
+
     // std::cout << "Type de surface : " << typeid(surface).name() << std::endl;
     // for (auto &&i : surface)
     // {
@@ -144,7 +150,6 @@ int main()
     // }
 
     ////////////////////// SHADERS /////////////////////////////
-
     // build and compile our shader zprogram
     // ------------------------------------
     Shader lightingShader("../shaders/1.colors.vs", "../shaders/1.colors.fs");
@@ -152,7 +157,6 @@ int main()
     ////////////////////////////////////////////////////////////
 
     //////////////////////// DATA ////////////////////////////
-
     // set up vertex data (and buffer(s)) and indices
     // ------------------------------------------------------------------
 
@@ -186,9 +190,7 @@ int main()
     };
     ////////////////////////////////////////////////////////////
 
-
     ////////////////////// VAO, VBO, EBO ////////////////////////////
-    
     VAO cubeVAO;
     VBO vbo(vertices, sizeof(vertices)); // utilisation du 1er constructeur
     EBO ebo(indices, sizeof(indices));
@@ -218,7 +220,7 @@ int main()
     
     sphereVBO.unbind();
     sphereEBO.unbind();
-
+    ///////////////////////////////////////////////////////////////
 
     ////////////////////// IMGUI /////////////////////////////
 	IMGUI_CHECKVERSION();
@@ -241,12 +243,12 @@ int main()
 
         // input
         // -----
-        processInput(window);
+        processInput(window, rayTraced);
 
         // render
         // ------
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        GL_CHECK(glClearColor(0.1f, 0.1f, 0.1f, 1.0f));
+        GL_CHECK(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
         // render imgui windows
         ImGui_ImplOpenGL3_NewFrame();
@@ -254,24 +256,25 @@ int main()
         
 
         // be sure to activate shader when setting uniforms/drawing objects
-        lightingShader.use();
-        lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f);
-        lightingShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f);
+        GL_CHECK(lightingShader.use());
+        GL_CHECK(lightingShader.setVec3("objectColor", 1.0f, 0.5f, 0.31f));
+        GL_CHECK(lightingShader.setVec3("lightColor",  1.0f, 1.0f, 1.0f));
 
         // view/projection transformations
         glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = camera.GetViewMatrix();
-        lightingShader.setMat4("projection", projection);
-        lightingShader.setMat4("view", view);
+
+        GL_CHECK(lightingShader.setMat4("projection", projection));
+        GL_CHECK(lightingShader.setMat4("view", view));
 
         // world transformation
         glm::mat4 model = glm::mat4(1.0f);
 
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // Position de la sphère
+        GL_CHECK(model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f))); // Position de la sphère
 
-        lightingShader.setMat4("model", model);
-
+        GL_CHECK(lightingShader.setMat4("model", model));
         //////////////////////////////////////////////////////////
+
         /////////////////////
         ////// CUBE /////////
         /////////////////////
@@ -292,10 +295,10 @@ int main()
         // glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
         
         //////////////////////////////////////////////////////////
-        lightingShader.use();
+        GL_CHECK(lightingShader.use());
         
-        //////////////////// ONTROL DOT RENDER ///////////////////////
-        glPointSize(10.f);
+        //////////////////// CONTROL DOT RENDER ///////////////////////
+        GL_CHECK(glPointSize(10.f));
 
         // Rendu des points
 
@@ -307,23 +310,37 @@ int main()
 
         // Rendu des points
         // maSurface.getControlPoint().getVAO().bind(); // test
-        // // dernier elem est le nombre de points de controle
+        // dernier elem est le nombre de points de controle
         // glDrawArrays(GL_POINTS, 0, maSurface.getControlPoint().getListPoint().size());
         // maSurface.getControlPoint().getVAO().unbind();
         
         // maSurface.renduSurfaceBezier();
 
-
-        sphereVAO.bind();
+        GL_CHECK(sphereVAO.bind());
 
         std::vector<unsigned int> &ind = maSphere.getIndices();
 
-        glDrawElements(GL_TRIANGLES,
+        GL_CHECK(glDrawElements(GL_TRIANGLES,
                         ind.size(),
                         GL_UNSIGNED_INT,
-                        (void*)0);
+                        (void*)0));
 
-       sphereVAO.unbind();
+        GL_CHECK(sphereVAO.unbind());
+        
+        //unbind manuel de l'ebo
+        GL_CHECK(sphereEBO.unbind());
+        // GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+
+        GL_CHECK(model = glm::mat4(1.0f));
+        GL_CHECK(lightingShader.setMat4("model", model));
+        GL_CHECK(lightingShader.setVec3("objectColor", 1.0f, 1.0f, 0.0f));
+        GL_CHECK(lightingShader.setVec3("lightColor", 1.0f, 1.0f, 0.0f));
+       
+    //    glLineWidth(5.0f);
+
+    //    glDisable(GL_DEPTH_TEST);
+        GL_CHECK(rayTraced.renduRay());
+    //    glEnable(GL_DEPTH_TEST);
 
 
         ///////////////////////////////////////////////////////
@@ -391,7 +408,7 @@ int main()
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window)
+void processInput(GLFWwindow *window, ray& rayTraced)
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
@@ -404,7 +421,24 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
 
+    // Partie Rayon 
+
+    bool spaceCurrentlyPressed = (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS);
+    if(spaceCurrentlyPressed && !spacePressedLastFrame)
+    {
+        std::cout << "Space clique" << std::endl;
+        rayTraced.add_ray(camera.Position, camera.Front);
+    }
+    spacePressedLastFrame = spaceCurrentlyPressed;
+
+    if((glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS)){
+        std::cout << "Ray cleaned" << std::endl;
+        rayTraced.clear_ray();
+        rayTraced.updateGLObject();
+    }
+
 }
+
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
