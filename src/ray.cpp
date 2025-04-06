@@ -5,7 +5,7 @@ ray::ray()
     GL_CHECK(vbo.bind());
     GL_CHECK(glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW)); // Buffer vide valide
     GL_CHECK(vao.bind());
-    vao.linkAttrib(vbo, 3); // Configuration des attributs
+    vao.linkAttrib(vbo, 0, 3); // Configuration des attributs
     //unbind
     GL_CHECK(vao.unbind());
     GL_CHECK(vbo.unbind());

@@ -30,7 +30,9 @@ class VAO {
 
         VAO();
         void linkAttrib(VBO& vbo);
-        void linkAttrib(VBO& vbo, int sparse);
+        void linkAttrib(VBO& vbo, int layout);
+        void linkAttrib(VBO& vbo, int components, int layout);
+        void linkAttrib(VBO& vbo, GLuint layoutLocation, GLint components, GLenum type, GLsizeiptr stride, const void* offset);
         void bind();
         void unbind();
         void del();

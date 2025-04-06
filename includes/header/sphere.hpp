@@ -18,6 +18,9 @@ private:
     float stackAngle;
 
     std::vector<glm::vec3> vertices;
+    std::vector<glm::vec3> normales;
+
+
     std::vector<unsigned int> indices;
     std::vector<int> lineIndices;
 
@@ -34,6 +37,7 @@ public:
     void updateIndices();
 
     std::vector<glm::vec3>& getVertices();
+    std::vector<glm::vec3>& getNormales();
 
     std::vector<unsigned int>& getIndices();
     std::vector<int>& getLineIndices();

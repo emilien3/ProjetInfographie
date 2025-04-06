@@ -18,10 +18,13 @@ sphere::~sphere()
 void sphere::renduSphere()
 {
     vertices.clear();
+    normales.clear();
+    
     indices.clear();
     lineIndices.clear();
 
     float z, xy, x, y;
+    float nx, ny, nz, lengthNorm = 1.0f/radius;
 
     sectorStep = 2* M_PI /sectorCount;
     stackStep = M_PI /stackCount;
@@ -31,6 +34,7 @@ void sphere::renduSphere()
         
         stackAngle = M_PI / 2 - i * stackStep;  // starting from pi/2 to -pi/2
         z = radius * sinf(stackAngle);
+        nz = z * lengthNorm;
         xy = radius * cosf(stackAngle);
         
         for (int j = 0; j <= sectorCount; ++j)
@@ -41,6 +45,11 @@ void sphere::renduSphere()
             x = xy * cosf(sectorAngle);
             y = xy * sinf(sectorAngle);
             vertices.push_back(glm::vec3(x, y, z));
+
+            // normalized vertex normal (nx, ny, nz)
+            nx = x * lengthNorm;
+            ny = y * lengthNorm;
+            normales.push_back(glm::vec3(nx, ny, nz));
 
         }
     }
@@ -86,6 +95,11 @@ void sphere::updateIndices()
 std::vector<glm::vec3>& sphere::getVertices()
 {
     return vertices;
+}
+
+std::vector<glm::vec3>& sphere::getNormales()
+{
+    return normales;
 }
 
 std::vector<unsigned int>& sphere::getIndices()
