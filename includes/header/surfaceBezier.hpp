@@ -45,6 +45,11 @@ public:
     void calculateSurfaceNormals();
 
 
+    EBO& getTriangleEBO(){return triangleEBO;}
+    VAO& getVAO(){return vao;}
+    VBO& getVBO(){return vbo;}
+
+
     const std::vector<unsigned int>& getTriangleIndices() const { return triangleIndices; } 
 
     ~surfaceBezier() = default;

@@ -299,7 +299,10 @@ int main()
         cubeVAO.unbind();
         GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 
-        //////////////////////////////////////////////////////////
+
+        
+        
+        ///////////////dessin de la sphère /////////////////////////
         Shader* currentSphereShader; // Pointeur vers le shader à utiliser
         if (showNormalsMode) {
             currentSphereShader = &normalsShader;
@@ -307,30 +310,29 @@ int main()
             currentSphereShader = &newShader;
         }
         GL_CHECK(currentSphereShader->use());
-
-          // Envoyer les uniforms COMMUNES aux deux shaders
+        
+        // Envoyer les uniforms COMMUNES aux deux shaders
         GL_CHECK(currentSphereShader->setMat4("projection", projection));
         GL_CHECK(currentSphereShader->setMat4("view", view));
         GL_CHECK(currentSphereShader->setMat4("model", model));
         glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
         GL_CHECK(currentSphereShader->setMat3("normalMatrix", normalMatrix));
-
+        
         // Envoyer les uniforms SPÉCIFIQUES au shader Lambertien (si actif)
         if (!showNormalsMode) {
             GL_CHECK(currentSphereShader->setVec3("objectColor", 0.8f, 0.8f, 0.8f));
             GL_CHECK(currentSphereShader->setVec3("lightColor",  1.0f, 1.0f, 1.0f));
             GL_CHECK(currentSphereShader->setVec3("lightPos", lightPos));
         }
-
+        
         //////////////////// Surface and sphere rendering ///////////////////////
         
         maSurface.renduSurfaceBezier();
-
-        std::vector<glm::vec3> pointsSurface = maSurface.getSurface();
         
+        // std::vector<glm::vec3> pointsSurface = maSurface.getSurface();
         // std::cout << " Ma surface contient " << pointsSurface.size() << " points" << std::endl;
-
-        GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+        
+        // GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
         
         GL_CHECK(sphereVAO.bind());
         std::vector<unsigned int> &ind = maSphere.getIndices();
@@ -340,9 +342,9 @@ int main()
             (void*)0)
         );
         GL_CHECK(sphereVAO.unbind());
-        //unbind manuel de l'ebo
         GL_CHECK(sphereEBO.unbind());
         // GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+        
 
         ////////////////////Courbes, points de controles et rayons //////////////////////
         // Color Shader param
