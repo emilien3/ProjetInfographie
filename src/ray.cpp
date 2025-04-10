@@ -56,3 +56,47 @@ void ray::renduRay(){
     GL_CHECK(vbo.unbind());
     GL_CHECK(vao.unbind());
 }
+
+
+void ray::verifCollisions(glm::vec3 sphereCenter, float radius)
+{
+    for (int i = 0; i < rayStored.size(); i+=2)
+    {
+        glm::vec3 rStart = rayStored[i];
+        glm::vec3 rEnd = rayStored[i+1];
+        glm::vec3 v = rEnd - rStart;
+        glm::vec3 oc = rStart - sphereCenter;
+        glm::vec3 d = glm::normalize(rEnd - rStart);
+        float r_2 = radius * radius;
+        
+        //  b = 2 * (o-c) d  //  a = dot d d  //  c = (o+c)^2 - (oc)^2 - r^2
+
+        float B = 2.0f * glm::dot(oc, d) ;
+        float A = glm::dot(d, d);
+        float C =  glm::dot(oc, oc) - r_2 ;
+        
+        //\delta = b^2 - 4*a*c
+        float delta = B*B - 4 * A * C;
+
+        if(delta >= 0)
+        {
+            float t = -B - glm::sqrt(delta) / 2 * A ;
+            if ((t >=0 )&& (t*t <= glm::dot(rEnd - rStart, rEnd - rStart)))
+            {
+                glm::vec3 coordContact = rStart + d * t ;
+                
+                // la normal au pt de contact
+                glm::vec3 normal = glm::normalize(coordContact-sphereCenter);
+
+                //calcul de la reflexion
+                float proj = glm::dot(normal, d);
+                glm::vec3 dReflect = d - 2.0f * proj * normal;
+
+                // on modifie et ajoute les rayons
+                rayStored[i + 1] = coordContact; 
+                add_ray(coordContact, dReflect); 
+
+            }
+        }
+    }
+}

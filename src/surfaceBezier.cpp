@@ -37,25 +37,20 @@ surfaceBezier::surfaceBezier(std::vector<glm::vec3>list1, std::vector<glm::vec3>
 // --- Implémentation updateTriangleIndices ---
 void surfaceBezier::updateTriangleIndices() {
     triangleIndices.clear();
-    if (n < 2 || m < 2) return; // Besoin d'au moins un quad
-
-    for (int i = 0; i < n - 1; ++i) { // Parcours des lignes de quads
-        for (int j = 0; j < m - 1; ++j) { // Parcours des colonnes de quads
-            // Indices des 4 coins du quad (i,j)
+    if (n < 2 || m < 2) return;
+    for (int i = 0; i < n - 1; ++i) {
+        for (int j = 0; j < m - 1; ++j) {
             unsigned int topLeft = i * m + j;
             unsigned int topRight = topLeft + 1;
             unsigned int bottomLeft = (i + 1) * m + j;
             unsigned int bottomRight = bottomLeft + 1;
-
-            // Premier triangle (topLeft, bottomLeft, topRight)
             triangleIndices.push_back(topLeft);
-            triangleIndices.push_back(bottomLeft);
             triangleIndices.push_back(topRight);
+            triangleIndices.push_back(bottomLeft);
 
-            // Second triangle (topRight, bottomLeft, bottomRight)
             triangleIndices.push_back(topRight);
-            triangleIndices.push_back(bottomLeft);
             triangleIndices.push_back(bottomRight);
+            triangleIndices.push_back(bottomLeft);
         }
     }
 }
@@ -136,13 +131,13 @@ void surfaceBezier::renduSurfaceBezier(){
     // for(int i = 0; i < n; ++i)
     // {
     //     // glDrawArrays(GL_LINE_STRIP, i * m, m);
-    //     glDrawElements(GL_TRIANGLES, m, GL_UNSIGNED_INT, (void*)(i * m * sizeof(unsigned int)));
+    //     glDrawElements(GL_LINE_STRIP, m, GL_UNSIGNED_INT, (void*)(i * m * sizeof(unsigned int)));
 
     // }
     // for(int j = 0; j < m; ++j)
     // {
     //     // glDrawArrays(GL_LINE_STRIP, j, n);
-    //     glDrawElements(GL_TRIANGLES, n, GL_UNSIGNED_INT, (void*)(n * m * sizeof(unsigned int) + j * n * sizeof(unsigned int)));
+    //     glDrawElements(GL_LINE_STRIP, n, GL_UNSIGNED_INT, (void*)(n * m * sizeof(unsigned int) + j * n * sizeof(unsigned int)));
 
     // }
     vao.unbind();

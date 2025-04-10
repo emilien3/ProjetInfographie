@@ -20,6 +20,7 @@ public:
     void add_ray(glm::vec3 pos, glm::vec3 front);
     void renduRay();
     void updateGLObject();
+    void verifCollisions(glm::vec3 sphereCenter, float radius);
 
 
     std::vector<glm::vec3>& getRayStored(){ return rayStored; }
