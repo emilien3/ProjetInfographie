@@ -29,7 +29,7 @@ void sphere::renduSphere()
     sectorStep = 2* M_PI /sectorCount;
     stackStep = M_PI /stackCount;
 
-    for (int i = 0; i < stackCount; ++i)
+    for (int i = 0; i <= stackCount; ++i)
     {
         
         stackAngle = M_PI / 2 - i * stackStep;  // starting from pi/2 to -pi/2

@@ -13,8 +13,7 @@ void main()
     float ambientVal = 0.1;
     vec3 ambient = ambientVal * lightColor;
 
-    // 2. Composante Diffuse (Lambertienne)
-    vec3 norm = normalize(Normal); // S'assurer que la normale est unitaire
+    vec3 norm = Normal;
     vec3 lightDir = normalize(lightPos - FragPos);
     
     float diff = max(dot(norm, lightDir), 0.0);

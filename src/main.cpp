@@ -67,6 +67,8 @@ float lastFrame = 0.0f;
 // lighting
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
+//surface
+glm::vec3 surfacePos(-1.2f, 1.0f, -2.0f);
 
 int main()
 {
@@ -134,7 +136,7 @@ int main()
     std::vector<glm::vec3> surface = concate2list(liste1, liste2);
     surfaceBezier maSurface(surface, liste1.size(), liste2.size(), 20, 20);
 
-    sphere maSphere(36, 18, 1.f);
+    sphere maSphere(32, 16, 1.f);
 
     // ray
     ray rayTraced;
@@ -221,7 +223,7 @@ int main()
 
     std::vector<glm::vec3>& sphereVertices = maSphere.getVertices();
     std::vector<unsigned int>& sphereIndices = maSphere.getIndices();
-    std::vector<glm::vec3>& sphereNormals = maSphere.getNormales(); // Récupère les normales
+    std::vector<glm::vec3>& sphereNormals = maSphere.getNormales();
     
     VAO sphereVAO;
     VBO sphereVBO(sphereVertices, sphereVertices.size());
@@ -243,7 +245,6 @@ int main()
     ///////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////
-    
 
     ////////////////////// IMGUI /////////////////////////////
 	IMGUI_CHECKVERSION();
@@ -285,7 +286,6 @@ int main()
         glm::mat4 model = glm::mat4(1.0f);
         GL_CHECK(model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)));
 
-
         // also draw the lamp object -> the smaller cube
         lightCubeShader.use();
         lightCubeShader.setMat4("projection", projection);
@@ -300,23 +300,20 @@ int main()
         cubeVAO.unbind();
         GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 
-        
-        //////////////////////////////////////////////////////////
+        ///////////////dessin de la sphère /////////////////////////
         Shader* currentSphereShader; // Pointeur vers le shader à utiliser
+
         if (showNormalsMode) {
             currentSphereShader = &normalsShader;
         } else {
             currentSphereShader = &newShader;
         }
         GL_CHECK(currentSphereShader->use());
-
-          // Envoyer les uniforms COMMUNES aux deux shaders
+        
+        // Envoyer les uniforms COMMUNES aux deux shaders
         GL_CHECK(currentSphereShader->setMat4("projection", projection));
         GL_CHECK(currentSphereShader->setMat4("view", view));
         GL_CHECK(currentSphereShader->setMat4("model", model));
-        glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(model)));
-        GL_CHECK(currentSphereShader->setMat3("normalMatrix", normalMatrix));
-
         // Envoyer les uniforms SPÉCIFIQUES au shader Lambertien (si actif)
         if (!showNormalsMode) {
             GL_CHECK(currentSphereShader->setVec3("objectColor", 0.8f, 0.8f, 0.8f));
@@ -324,15 +321,22 @@ int main()
             GL_CHECK(currentSphereShader->setVec3("lightPos", lightPos));
         }
 
-        //////////////////// Surface and sphere rendering ///////////////////////
+        modelLight = glm::translate(modelLight, lightPos);
         
-        maSurface.renduSurfaceBezier();
-
+        //////////////////// sphere rendering ///////////////////////
         
-
-
-        GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+        // Envoyer les uniforms COMMUNES aux deux shaders
+        GL_CHECK(currentSphereShader->setMat4("projection", projection));
+        GL_CHECK(currentSphereShader->setMat4("view", view));
+        GL_CHECK(currentSphereShader->setMat4("model", model));
         
+        // Envoyer les uniforms SPÉCIFIQUES au shader Lambertien
+        if (!showNormalsMode) {
+            GL_CHECK(currentSphereShader->setVec3("objectColor", 0.8f, 0.8f, 0.8f));
+            GL_CHECK(currentSphereShader->setVec3("lightColor",  1.0f, 1.0f, 1.0f));
+            GL_CHECK(currentSphereShader->setVec3("lightPos", lightPos));
+        }
+    
         GL_CHECK(sphereVAO.bind());
         std::vector<unsigned int> &ind = maSphere.getIndices();
         GL_CHECK(glDrawElements(GL_TRIANGLES,
@@ -341,13 +345,17 @@ int main()
             (void*)0)
         );
         GL_CHECK(sphereVAO.unbind());
-        //unbind manuel de l'ebo
         GL_CHECK(sphereEBO.unbind());
-        // GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
-            
-            
+
+        
+        //décalage de la surface
+        glm::mat4 modelSurface = glm::mat4(1.0f);
+        modelSurface = glm::translate(modelSurface, surfacePos);
+        currentSphereShader->setMat4("model", modelSurface);
+        
+        maSurface.renduSurfaceBezier();
+
         ////////////////////Courbes, points de controles et rayons //////////////////////
-            
         // Color Shader param
         GL_CHECK(glPointSize(10.f));
         GL_CHECK(colorShader.use());
@@ -358,7 +366,6 @@ int main()
         GL_CHECK(colorShader.setMat4("model", model));
         GL_CHECK(colorShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f));
 
-
         GL_CHECK(colorShader.setVec3("objectColor", 1.0f, 1.0f, 0.0f));
         courbe1.renduPointControl();
         courbe2.renduPointControl();
@@ -367,12 +374,10 @@ int main()
         courbe1.renduCourbeBezier();
         courbe2.renduCourbeBezier();
         
-        
         GL_CHECK(colorShader.setVec3("objectColor", 1.0f, 0.0f, 0.0f));
         GL_CHECK(rayTraced.renduRay());
 
         //////////////////// IMGUI RENDERING ///////////////////////
-        
         ///// rendu de la fenetre
         // Dans la boucle de rendu (main.cpp) :
 
@@ -395,14 +400,12 @@ int main()
         // Effectuez le rendu ImGui une seule fois
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
         ///////////////////////////////////////////////////////
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
         glfwSwapBuffers(window);
         glfwPollEvents();
-
     }
     
     //// DELETE IMGUI //////
@@ -429,7 +432,6 @@ int main()
     glfwTerminate();
     return 0;
 }
-
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////
@@ -450,12 +452,12 @@ void processInput(GLFWwindow *window, ray& rayTraced)
         camera.ProcessKeyboard(RIGHT, deltaTime);
 
     // Partie Rayon 
-
     bool spaceCurrentlyPressed = (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS);
     if(spaceCurrentlyPressed && !spacePressedLastFrame)
     {
         std::cout << "Space clique" << std::endl;
         rayTraced.add_ray(camera.Position, camera.Front);
+        rayTraced.verifCollisions(glm::vec3(0.0f), 1.0f);
     }
     spacePressedLastFrame = spaceCurrentlyPressed;
 
@@ -466,8 +468,6 @@ void processInput(GLFWwindow *window, ray& rayTraced)
     }
 
     //Partie Normale 
-
-
     bool N_CurrentlyPressed = (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS);
     if (N_CurrentlyPressed && !N_KeyPressedLastFrame) {
         showNormalsMode = !showNormalsMode; // Basculer le mode

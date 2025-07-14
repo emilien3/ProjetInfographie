@@ -2,7 +2,7 @@
 #include "header/utils.hpp"
 
 courbeBezier::courbeBezier(const std::vector<glm::vec3> &list)
-    : controlPoints(list) //initialisation directe
+    : controlPoints(list)
 {
     bezierCourbes(controlPoints.getListPoint(), courbe, nbpoints);
     vbo.bind();
@@ -47,7 +47,6 @@ void courbeBezier::renduCourbeBezier(){
     vao.bind();
     if (previousnbpoints != nbpoints)
     {
-        //actualisation du nombre de points de la courbe de beziers
         previousnbpoints = nbpoints;
         bezierCourbes(controlPoints.getListPoint(), courbe, nbpoints);
         // /// TEST

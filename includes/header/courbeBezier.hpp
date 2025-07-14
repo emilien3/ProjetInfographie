@@ -34,7 +34,7 @@ public:
     courbeBezier(const std::vector<glm::vec3> &list);
     ~courbeBezier();
 
-    int nbpoints = 4;    
+    int nbpoints = 4;
     
     void renduPointControl();
     void renduCourbeBezier();
