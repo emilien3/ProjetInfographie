@@ -26,6 +26,21 @@ void ray::add_ray(glm::vec3 pos, glm::vec3 front){
     GL_CHECK(checkOpenGLError("After updateGLObject in add_ray", __FILE__, __LINE__));
 }
 
+void ray::add_ray(glm::vec3 pos, glm::vec3 front, int position){
+    rayStored.insert(rayStored.begin(), glm::vec3(
+        front.x * 10 + pos.x, 
+        front.y * 10 + pos.y,
+        front.z * 10 + pos.z
+        )
+    );
+    rayStored.insert(rayStored.begin(), pos);
+    std::cout << pos.x << pos.y << pos.z << std::endl;
+    std::cout << front.x << front.y << front.z << std::endl;
+    updateGLObject();
+    GL_CHECK(checkOpenGLError("After updateGLObject in add_ray", __FILE__, __LINE__));
+}
+
+
 void ray::updateGLObject(){
     if (rayStored.empty())
     {
@@ -80,10 +95,30 @@ void ray::verifCollisions(glm::vec3 sphereCenter, float radius)
 
         if(delta >= 0)
         {
-            float t = -B - glm::sqrt(delta) / 2 * A ;
-            if ((t >=0 )&& (t*t <= glm::dot(rEnd - rStart, rEnd - rStart)))
+
+            if (delta == 0)
             {
+                float t = -B / 2 * A ;
                 glm::vec3 coordContact = rStart + d * t ;
+                
+                // la normal au pt de contact
+                glm::vec3 normal = glm::normalize(coordContact-sphereCenter);
+                
+                //calcul de la reflexion
+                float proj = glm::dot(normal, d);
+                glm::vec3 dReflect = d - 2.0f * proj * normal;
+                
+                // on modifie et ajoute les rayons
+                rayStored[i + 1] = coordContact; 
+                add_ray(coordContact, dReflect); 
+            }
+
+            float t1 = -B - glm::sqrt(delta) / 2 * A ;
+            float t2 = -B + glm::sqrt(delta) / 2 * A ;
+
+            if ((t1 >=0 ))
+            {
+                glm::vec3 coordContact = rStart + d * t1 ;
                 
                 // la normal au pt de contact
                 glm::vec3 normal = glm::normalize(coordContact-sphereCenter);

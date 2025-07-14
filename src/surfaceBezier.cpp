@@ -34,12 +34,12 @@ surfaceBezier::surfaceBezier(std::vector<glm::vec3>list1, std::vector<glm::vec3>
     : surfaceBezier(concate2list(list1, list2), list1.size(), list2.size(), 4, 4)
 {}
 
-// --- Implémentation updateTriangleIndices ---
 void surfaceBezier::updateTriangleIndices() {
     triangleIndices.clear();
     if (n < 2 || m < 2) return;
     for (int i = 0; i < n - 1; ++i) {
         for (int j = 0; j < m - 1; ++j) {
+
             unsigned int topLeft = i * m + j;
             unsigned int topRight = topLeft + 1;
             unsigned int bottomLeft = (i + 1) * m + j;
@@ -57,34 +57,32 @@ void surfaceBezier::updateTriangleIndices() {
 
 void surfaceBezier::calculateSurfaceNormals() {
     surfaceNormals.clear();
-    surfaceNormals.resize(surface.size(), glm::vec3(0.0f)); // Initialiser à zéro
+    surfaceNormals.resize(surface.size(), glm::vec3(0.0f));
 
-    if (n < 2 || m < 2 || triangleIndices.empty()) return; // Pas de faces à calculer
+    if (n < 2 || m < 2 || triangleIndices.empty()) return;
 
-    // Calculer la normale de chaque face (triangle) et l'accumuler sur ses sommets
-    for (size_t idx = 0; idx < triangleIndices.size(); idx += 3) {
+    for (int idx = 0; idx < triangleIndices.size(); idx += 3) {
+        // les indices des trian
         unsigned int i1 = triangleIndices[idx];
         unsigned int i2 = triangleIndices[idx + 1];
         unsigned int i3 = triangleIndices[idx + 2];
-
         const glm::vec3& v1 = surface[i1];
         const glm::vec3& v2 = surface[i2];
         const glm::vec3& v3 = surface[i3];
 
-        // Vecteurs des côtés du triangle
-        glm::vec3 edge1 = v2 - v1;
-        glm::vec3 edge2 = v3 - v1;
+        //  On doit prendre les cote des triangles pour faire
+        // un produit vectoriel qui nous la normale de la face
 
-        // Produit vectoriel pour obtenir la normale de la face (non normalisée)
-        glm::vec3 faceNormal = glm::cross(edge1, edge2);
-
-        // Ajouter cette normale de face aux normales des 3 sommets
+        glm::vec3 cote1 = v2 - v1;
+        glm::vec3 cote2 = v3 - v1;
+        glm::vec3 faceNormal = glm::cross(cote1, cote2);
+        // on ajout la normal au vector les contenans
         surfaceNormals[i1] += faceNormal;
         surfaceNormals[i2] += faceNormal;
         surfaceNormals[i3] += faceNormal;
     }
 
-    // Normaliser toutes les normales de sommets accumulées
+    //on notrmalise les normals
     for (glm::vec3& normal : surfaceNormals) {
         normal = glm::normalize(normal);
     }
@@ -111,8 +109,7 @@ void surfaceBezier::renduSurfaceBezier(){
         updateTriangleIndices();
         calculateSurfaceNormals();
         
-        
-        vbo.bind();// Mettre à jour le VBO avec les nouveaux points
+        vbo.bind();
         glBufferData(GL_ARRAY_BUFFER, surface.size() * sizeof(glm::vec3), surface.data(), GL_DYNAMIC_DRAW);
         
         normalVBO.bind();

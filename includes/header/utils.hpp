@@ -5,7 +5,7 @@
 #include <glm/glm.hpp>
 
 ////////////////////////////////////////////////////////////////////////////////
-#include <glad/glad.h> // Assurez-vous que GLAD est inclus
+#include <glad/glad.h>
 
 inline void checkOpenGLError(const char* stmt, const char* fname, int line) {
     GLenum err;

@@ -18,6 +18,7 @@ private:
 public:
     ray();
     void add_ray(glm::vec3 pos, glm::vec3 front);
+    void add_ray(glm::vec3 pos, glm::vec3 front, int position);
     void renduRay();
     void updateGLObject();
     void verifCollisions(glm::vec3 sphereCenter, float radius);

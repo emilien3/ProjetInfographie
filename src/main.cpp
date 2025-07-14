@@ -136,7 +136,7 @@ int main()
     std::vector<glm::vec3> surface = concate2list(liste1, liste2);
     surfaceBezier maSurface(surface, liste1.size(), liste2.size(), 20, 20);
 
-    sphere maSphere(36, 18, 1.f);
+    sphere maSphere(32, 16, 1.f);
 
     // ray
     ray rayTraced;
@@ -330,7 +330,7 @@ int main()
         GL_CHECK(currentSphereShader->setMat4("view", view));
         GL_CHECK(currentSphereShader->setMat4("model", model));
         
-        // Envoyer les uniforms SPÉCIFIQUES au shader Lambertien (si actif)
+        // Envoyer les uniforms SPÉCIFIQUES au shader Lambertien
         if (!showNormalsMode) {
             GL_CHECK(currentSphereShader->setVec3("objectColor", 0.8f, 0.8f, 0.8f));
             GL_CHECK(currentSphereShader->setVec3("lightColor",  1.0f, 1.0f, 1.0f));
