@@ -113,10 +113,10 @@ void ray::verifCollisions(glm::vec3 sphereCenter, float radius)
                 add_ray(coordContact, dReflect); 
             }
 
-            float t1 = -B - glm::sqrt(delta) / 2 * A ;
-            float t2 = -B + glm::sqrt(delta) / 2 * A ;
-
-            if ((t1 >=0 ))
+            float t1 = (-B - glm::sqrt(delta)) / (2 * A) ;
+            float t2 = (-B + glm::sqrt(delta)) / (2 * A) ;
+            float epsilon = 0.0001;
+            if ((t1 >= epsilon ))
             {
                 glm::vec3 coordContact = rStart + d * t1 ;
                 
