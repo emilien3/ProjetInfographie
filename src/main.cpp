@@ -32,6 +32,7 @@
 #include "header/surfaceBezier.hpp"
 #include "header/sphere.hpp"
 #include "header/ray.hpp"
+#include "header/cylindre.hpp"
 
 #include "header/utils.hpp"
 // #include "header/glfwWindow.hpp"
@@ -69,6 +70,7 @@ glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 
 //surface
 glm::vec3 surfacePos(-1.2f, 1.0f, -2.0f);
+glm::vec3 cylindrePos(-7.2f, 1.0f, -3.0f);
 
 int main()
 {
@@ -141,18 +143,9 @@ int main()
     // ray
     ray rayTraced;
 
-    // std::cout << "Type de surface : " << typeid(surface).name() << std::endl;
-    // for (auto &&i : surface)
-    // {
-    //     std::cout << i.x << i.y << i.z << std::endl; 
-    // }
+    // cylinder
+    Cylinder monCylindre(1.0f, 5.0f, 36, 10);
 
-    // std::vector<glm::vec3> testing = maSurface.getControlPoint().getListPoint();
-    // std::cout << "Type de surface from object ma surface : " << typeid(surface).name() << std::endl;
-    // for (auto &&i : surface)
-    // {
-    //     std::cout << i.x << i.y << i.z << std::endl; 
-    // }
 
     ////////////////////// SHADERS /////////////////////////////
     // build and compile our shader zprogram
@@ -354,6 +347,14 @@ int main()
         currentSphereShader->setMat4("model", modelSurface);
         
         maSurface.renduSurfaceBezier();
+        
+        // décalage du cylindre
+        modelSurface = glm::mat4(1.0f);
+        modelSurface = glm::translate(modelSurface, -cylindrePos);
+        currentSphereShader->setMat4("model", modelSurface);
+
+        GL_CHECK(currentSphereShader->setVec3("objectColor", 1.0f, 0.2f, 0.2f));
+        monCylindre.renduCylinder();
 
         ////////////////////Courbes, points de controles et rayons //////////////////////
         // Color Shader param
