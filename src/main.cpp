@@ -59,7 +59,9 @@ bool shiftMode = false;
 bool spacePressedLastFrame = false;
 bool showNormalsMode = false;
 bool N_KeyPressedLastFrame = false;
+bool W_KeyPressedLastFrame = false;
 
+bool showWireFrame = false;
 
 // timing
 float deltaTime = 0.0f;
@@ -264,7 +266,7 @@ int main()
 
         // render
         // ------
-        GL_CHECK(glClearColor(0.1f, 0.1f, 0.1f, 1.0f));
+        GL_CHECK(glClearColor(0.2f, 0.4f, 0.8f, 1.0f));
         GL_CHECK(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
         // render imgui windows
@@ -367,7 +369,7 @@ int main()
         GL_CHECK(colorShader.setMat4("model", model));
         GL_CHECK(colorShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f));
 
-        GL_CHECK(colorShader.setVec3("objectColor", 1.0f, 1.0f, 0.0f));
+        GL_CHECK(colorShader.setVec3(" ", 1.0f, 1.0f, 0.0f));
         courbe1.renduPointControl();
         courbe2.renduPointControl();
 
@@ -475,7 +477,14 @@ void processInput(GLFWwindow *window, ray& rayTraced)
         std::cout << "Show Normals Mode: " << (showNormalsMode ? "ON" : "OFF") << std::endl;
     }
     N_KeyPressedLastFrame = N_CurrentlyPressed;
-
+    
+    // partie wireframe
+    bool W_CurrentlyPressed = (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS);
+    if (W_CurrentlyPressed && !W_KeyPressedLastFrame) {
+        showWireFrame = !showWireFrame; // Basculer le mode
+        std::cout << "Show WireFrame Mode: " << (showWireFrame ? "ON" : "OFF") << std::endl;
+    }
+    W_KeyPressedLastFrame = W_CurrentlyPressed;
 }
 
 
