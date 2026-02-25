@@ -2,19 +2,19 @@
 
 #include "header/controlPoint.hpp"
 
-class bone
+class Bone
 {
 private:
     
-    controlPoint ;
+    glm::vec3 position;
 
 
 public:
-    bone() = delete;
+    Bone() = delete;
     
-    bone(glm::vec3 point1, glm::vec3 point2);
+    Bone(glm::vec3 pos);
 
-    ~bone();
+    ~Bone(){};
 
 
 };

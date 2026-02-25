@@ -358,7 +358,11 @@ int main()
         GL_CHECK(currentSphereShader->setVec3("objectColor", 1.0f, 0.2f, 0.2f));
         monCylindre.renduCylinder();
 
-        ////////////////////Courbes, points de controles et rayons //////////////////////
+
+        ////////////////////////////////////////////////////////////////////////////////
+        ////////////////////Courbes, points de controles et rayons /////////////////////
+        ////////////////////////////////////////////////////////////////////////////////
+
         // Color Shader param
         GL_CHECK(glPointSize(10.f));
         GL_CHECK(colorShader.use());
@@ -380,7 +384,10 @@ int main()
         GL_CHECK(colorShader.setVec3("objectColor", 1.0f, 0.0f, 0.0f));
         GL_CHECK(rayTraced.renduRay());
 
+        ////////////////////////////////////////////////////////////
         //////////////////// IMGUI RENDERING ///////////////////////
+        ////////////////////////////////////////////////////////////
+        
         ///// rendu de la fenetre
         // Dans la boucle de rendu (main.cpp) :
 
