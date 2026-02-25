@@ -159,6 +159,9 @@ int main()
     Shader normalsShader("../shaders/lighting.vs", "../shaders/normal.fs");
 
     Shader skyboxShader("../shaders/skybox.vs", "../shaders/skybox.fs");
+    
+    Shader reflectionShader("../shaders/objectCubeBox.vs", "../shaders/reflection.fs");
+    Shader refractionShader("../shaders/objectCubeBox.vs", "../shaders/refraction.fs");
     ////////////////////////////////////////////////////////////
 
     //////////////////////// DATA ////////////////////////////
@@ -289,9 +292,9 @@ int main()
         GL_CHECK(glClearColor(0.2f, 0.4f, 0.8f, 1.0f));
         GL_CHECK(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-        // render imgui windows
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
+        // // render imgui windows
+        // ImGui_ImplOpenGL3_NewFrame();
+        // ImGui_ImplGlfw_NewFrame();
 
         //////////////////////////////////////////////////////////
         
@@ -362,7 +365,6 @@ int main()
         GL_CHECK(sphereVAO.unbind());
         GL_CHECK(sphereEBO.unbind());
 
-        
         //décalage de la surface
         glm::mat4 modelSurface = glm::mat4(1.0f);
         modelSurface = glm::translate(modelSurface, surfacePos);
@@ -370,14 +372,21 @@ int main()
         
         maSurface.renduSurfaceBezier();
         
+        Shader* currentShader ;
         // décalage du cylindre
+        currentShader = &reflectionShader;
+        // currentShader = &refractionShader;
+
         modelSurface = glm::mat4(1.0f);
         modelSurface = glm::translate(modelSurface, -cylindrePos);
         currentSphereShader->setMat4("model", modelSurface);
 
-        GL_CHECK(currentSphereShader->setVec3("objectColor", 1.0f, 0.2f, 0.2f));
-        monCylindre.renduCylinder();
+        GL_CHECK(currentSphereShader->setMat4("projection", projection));
+        GL_CHECK(currentSphereShader->setMat4("view", view));
 
+        // GL_CHECK(currentShader->setVec3("objectColor", 1.0f, 0.2f, 0.2f));
+        
+        monCylindre.renduCylinder();
 
         ////////////////////////////////////////////////////////////////////////////////
         ////////////////////Courbes, points de controles et rayons /////////////////////
