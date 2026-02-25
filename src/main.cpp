@@ -33,6 +33,7 @@
 #include "header/sphere.hpp"
 #include "header/ray.hpp"
 #include "header/cylindre.hpp"
+#include "header/cubemap.hpp"
 
 #include "header/utils.hpp"
 // #include "header/glfwWindow.hpp"
@@ -156,6 +157,8 @@ int main()
     Shader lightCubeShader("../shaders/1.light_cube.vs", "../shaders/1.light_cube.fs");
     Shader newShader("../shaders/lighting.vs", "../shaders/lighting.fs");
     Shader normalsShader("../shaders/lighting.vs", "../shaders/normal.fs");
+
+    Shader skyboxShader("shaders/skybox.vs", "shaders/skybox.fs");
     ////////////////////////////////////////////////////////////
 
     //////////////////////// DATA ////////////////////////////
@@ -238,6 +241,23 @@ int main()
     sphereEBO.unbind();
 
     ///////////////////////////////////////////////////////////////
+    // CubeMap - SkyBox
+
+    std::vector<std::string> faces
+    {
+        FileSystem::getPath("textures/skybox/right.jpg"),
+        FileSystem::getPath("textures/skybox/left.jpg"),
+        FileSystem::getPath("textures/skybox/top.jpg"),
+        FileSystem::getPath("textures/skybox/bottom.jpg"),
+        FileSystem::getPath("textures/skybox/front.jpg"),
+        FileSystem::getPath("textures/skybox/back.jpg")
+    };
+
+    Cubemap my_sky_box;
+    unsigned int cubemapTexture = my_sky_box.loadCubemap(faces);  
+
+
+
     ///////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////
 
@@ -384,10 +404,34 @@ int main()
         GL_CHECK(colorShader.setVec3("objectColor", 1.0f, 0.0f, 0.0f));
         GL_CHECK(rayTraced.renduRay());
 
+        // Rendu de la skybox 
+
+        glDepthFunc(GL_LEQUAL);
+        skyboxShader.use();
+
+        glm::mat4 view1 = glm::mat4(glm::mat3(camera.GetViewMatrix())); 
+        
+        skyboxShader.setMat4("view", view1);
+        skyboxShader.setMat4("projection", projection);
+        
+        cubeVAO.bind();
+        my_sky_box.bind();
+        glActiveTexture(GL_TEXTURE0);
+
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        cubeVAO.unbind();
+        GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+    
+
+        glDepthFunc(GL_LESS);
+
+        //Fin du rendu de la skybox
+
+
         ////////////////////////////////////////////////////////////
         //////////////////// IMGUI RENDERING ///////////////////////
         ////////////////////////////////////////////////////////////
-        
+
         ///// rendu de la fenetre
         // Dans la boucle de rendu (main.cpp) :
 

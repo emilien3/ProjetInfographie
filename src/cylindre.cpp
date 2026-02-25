@@ -16,7 +16,6 @@ void Cylinder::buildCylinder()
     normales.clear();
     indices.clear();
 
-    // 1. Génération des Sommets (Positions) et des Normales
     for (int i = 0; i <= stackCount; ++i)
     {
         // On calcule la position sur la hauteur (axe Y) : de -length/2 à +length/2
