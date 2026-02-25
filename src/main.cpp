@@ -158,7 +158,7 @@ int main()
     Shader newShader("../shaders/lighting.vs", "../shaders/lighting.fs");
     Shader normalsShader("../shaders/lighting.vs", "../shaders/normal.fs");
 
-    Shader skyboxShader("shaders/skybox.vs", "shaders/skybox.fs");
+    Shader skyboxShader("../shaders/skybox.vs", "../shaders/skybox.fs");
     ////////////////////////////////////////////////////////////
 
     //////////////////////// DATA ////////////////////////////
