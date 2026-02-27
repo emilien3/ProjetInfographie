@@ -27,15 +27,20 @@
 #include "header/vbo.hpp"
 #include "header/ebo.hpp"
 
-#include "header/controlPoint.hpp"
-#include "header/courbeBezier.hpp"
-#include "header/surfaceBezier.hpp"
-#include "header/sphere.hpp"
 #include "header/ray.hpp"
 #include "header/cylindre.hpp"
 #include "header/cubemap.hpp"
 
 #include "header/utils.hpp"
+
+// 3D Objects
+#include "header/cube.hpp"
+
+#include "header/controlPoint.hpp"
+#include "header/courbeBezier.hpp"
+#include "header/surfaceBezier.hpp"
+#include "header/sphere.hpp"
+
 // #include "header/glfwWindow.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -204,16 +209,23 @@ int main()
     //////////////// CUBE //////////////////////
     ////////////////////////////////////////////
 
+    Cube monCube;
+    glm::mat4 modele = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
+    monCube.setModelMatrix(modele);
+
     VAO cubeVAO;
     VBO vbo(vertices, sizeof(vertices)); // utilisation du 1er constructeur
     EBO ebo(indices, sizeof(indices));
+
     cubeVAO.bind();
     ebo.bind();
     cubeVAO.linkAttrib(vbo);
-    cubeVAO.unbind();
+    
     // unbind
+    cubeVAO.unbind();
     vbo.unbind();
     ebo.unbind();
+
 
     //////////////////////////////////////////////
     //////////////// SPHERE //////////////////////
@@ -317,6 +329,11 @@ int main()
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
         cubeVAO.unbind();
         GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+
+        ////nvx cube 
+
+        monCube.Draw(lightCubeShader);
+
 
         ///////////////dessin de la sphère /////////////////////////
         Shader* currentSphereShader; // Pointeur vers le shader à utiliser
@@ -472,7 +489,6 @@ int main()
         ImGui::End();
 
         ImGui::Begin("Propriétés des Matériaux");
-        // Ce slider modifie la variable en temps réel (de 0.3 à 3.0)
         ImGui::SliderFloat("Ratio Réfraction", &currentRefractionRatio, 0.42f, 1.0f);
         ImGui::End();
 
