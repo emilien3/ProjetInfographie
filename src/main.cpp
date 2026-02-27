@@ -160,8 +160,8 @@ int main()
 
     Shader skyboxShader("../shaders/skybox.vs", "../shaders/skybox.fs");
     
-    Shader reflectionShader("../shaders/objectCubeBox.vs", "../shaders/reflection.fs");
-    Shader refractionShader("../shaders/objectCubeBox.vs", "../shaders/refraction.fs");
+    Shader reflectionShader("../shaders/lighting.vs", "../shaders/reflection.fs");
+    Shader refractionShader("../shaders/lighting.vs", "../shaders/refraction.fs");
     ////////////////////////////////////////////////////////////
 
     //////////////////////// DATA ////////////////////////////
@@ -259,7 +259,7 @@ int main()
     Cubemap my_sky_box;
     unsigned int cubemapTexture = my_sky_box.loadCubemap(faces);  
 
-
+    float currentRefractionRatio = 1.00f / 1.52f;
 
     ///////////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////
@@ -372,20 +372,30 @@ int main()
         
         maSurface.renduSurfaceBezier();
         
-        Shader* currentShader ;
-        // décalage du cylindre
-        currentShader = &reflectionShader;
-        // currentShader = &refractionShader;
+        // CYLINDRE
+        Shader* currentShader = &reflectionShader;
 
+        currentShader = &refractionShader;
+        
+        currentShader->use();
+        GL_CHECK(currentShader->setVec3("cameraPos", camera.Position));
+        
+        GL_CHECK(currentShader->setFloat("refractionRatio", currentRefractionRatio));
+        
+        // décalage du cylindre
         modelSurface = glm::mat4(1.0f);
         modelSurface = glm::translate(modelSurface, -cylindrePos);
-        currentSphereShader->setMat4("model", modelSurface);
-
-        GL_CHECK(currentSphereShader->setMat4("projection", projection));
-        GL_CHECK(currentSphereShader->setMat4("view", view));
+        
+        GL_CHECK(currentShader->setMat4("model", modelSurface));
+        GL_CHECK(currentShader->setMat4("projection", projection));
+        GL_CHECK(currentShader->setMat4("view", view));
 
         // GL_CHECK(currentShader->setVec3("objectColor", 1.0f, 0.2f, 0.2f));
         
+        glActiveTexture(GL_TEXTURE0);
+        my_sky_box.bind();
+        currentShader->setInt("skybox", 0);
+
         monCylindre.renduCylinder();
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -413,7 +423,9 @@ int main()
         GL_CHECK(colorShader.setVec3("objectColor", 1.0f, 0.0f, 0.0f));
         GL_CHECK(rayTraced.renduRay());
 
+        /////////////////////
         // Rendu de la skybox 
+        /////////////////////
 
         glDepthFunc(GL_LEQUAL);
         skyboxShader.use();
@@ -424,14 +436,13 @@ int main()
         skyboxShader.setMat4("projection", projection);
         
         cubeVAO.bind();
+
         my_sky_box.bind();
         glActiveTexture(GL_TEXTURE0);
-
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
         cubeVAO.unbind();
         GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
     
-
         glDepthFunc(GL_LESS);
 
         //Fin du rendu de la skybox
@@ -458,6 +469,11 @@ int main()
         ImGui::Begin("Surface Settings");
         ImGui::SliderInt("Resolution U", &maSurface.n, 2, 50);
         ImGui::SliderInt("Resolution V", &maSurface.m, 2, 50);
+        ImGui::End();
+
+        ImGui::Begin("Propriétés des Matériaux");
+        // Ce slider modifie la variable en temps réel (de 0.3 à 3.0)
+        ImGui::SliderFloat("Ratio Réfraction", &currentRefractionRatio, 0.42f, 1.0f);
         ImGui::End();
 
         // Effectuez le rendu ImGui une seule fois
