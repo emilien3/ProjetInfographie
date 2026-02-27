@@ -70,7 +70,11 @@ class Objet3D
             shader.setMat4("model", m_modelMatrix);
             
             m_vao->bind();
-            glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(m_indices.size()), GL_UNSIGNED_INT, 0);
+            if (m_indices.empty()) {
+                glDrawArrays(GL_TRIANGLES, 0, static_cast<unsigned int>(m_vertices.size()));
+            } else {
+                glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(m_indices.size()), GL_UNSIGNED_INT, 0);
+            }            
             m_vao->unbind();
         }
 
