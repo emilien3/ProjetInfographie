@@ -1,41 +1,24 @@
 #pragma once
+#include "header/object.hpp"
+#include <cmath>
 
-// #pragma once
-// #include "header/object.hpp"
-// #include <cmath>
+class Cylinder : public Objet3D
+{
 
-#include <vector>
-#include <glm/glm.hpp>
-#include <glad/glad.h>
-#include "vao.hpp"
-#include "vbo.hpp"
-#include "ebo.hpp"
+    private:
+        float radius;
+        float length;
+        int sectorCount;
+        int stackCount; 
+        void buildCylinder();
 
-class Cylinder {
-private:
-    float radius;
-    float length;
-    int sectorCount;
-    int stackCount; 
-
-    std::vector<glm::vec3> vertices;
-    std::vector<glm::vec3> normales;
-    std::vector<unsigned int> indices;
-
-    VAO vao;
-    VBO vbo;
-    VBO normalVBO;
-    EBO ebo;
-
-    void buildCylinder();
-    void updateBuffers();
-
-public:
-    Cylinder(float radius = 0.5f, float length = 3.0f, int sectorCount = 36, int stackCount = 10);
-    ~Cylinder();
-
-    void renduCylinder();
+        
+    public:
+        Cylinder(float radius = 1.0f, float length = 5.0f, int sectorCount = 36, int stackCount = 10)
+            : radius(radius), length(length), sectorCount(sectorCount), stackCount(stackCount)
+        {
+            buildCylinder();
+        }
+        ~Cylinder() override = default;
     
-    std::vector<glm::vec3>& getVertices() { return vertices; }
-    std::vector<unsigned int>& getIndices() { return indices; }
 };
