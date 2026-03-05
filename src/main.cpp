@@ -146,7 +146,7 @@ int main()
     std::vector<glm::vec3> surface = concate2list(liste1, liste2);
     surfaceBezier maSurface(surface, liste1.size(), liste2.size(), 20, 20);
 
-    sphere maSphere(32, 16, 1.f);
+    Sphere maSphere;
 
     // ray
     ray rayTraced;
@@ -238,28 +238,31 @@ int main()
     //////////////////////////////////////////////
 
     //////////// VERTICES ///////////////////
-    maSphere.renduSphere();
+    
 
-    std::vector<glm::vec3>& sphereVertices = maSphere.getVertices();
-    std::vector<unsigned int>& sphereIndices = maSphere.getIndices();
-    std::vector<glm::vec3>& sphereNormals = maSphere.getNormales();
     
-    VAO sphereVAO;
-    VBO sphereVBO(sphereVertices, sphereVertices.size());
-    VBO sphereNormalVBO(sphereNormals, sphereNormals.size());
-    EBO sphereEBO(sphereIndices.data(), sphereIndices.size() * sizeof(unsigned int));
-    
-    sphereVAO.bind();
-    sphereEBO.bind();
-    
-    sphereVBO.bind();
-    sphereVAO.linkAttrib(sphereVBO, 0);
-    sphereNormalVBO.bind();
-    sphereVAO.linkAttrib(sphereNormalVBO, 1);
+    // maSphere.renduSphere();
 
-    sphereVAO.unbind();
-    GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, 0));
-    sphereEBO.unbind();
+    // std::vector<glm::vec3>& sphereVertices = maSphere.getVertices();
+    // std::vector<unsigned int>& sphereIndices = maSphere.getIndices();
+    // std::vector<glm::vec3>& sphereNormals = maSphere.getNormales();
+    
+    // VAO sphereVAO;
+    // VBO sphereVBO(sphereVertices, sphereVertices.size());
+    // VBO sphereNormalVBO(sphereNormals, sphereNormals.size());
+    // EBO sphereEBO(sphereIndices.data(), sphereIndices.size() * sizeof(unsigned int));
+    
+    // sphereVAO.bind();
+    // sphereEBO.bind();
+    
+    // sphereVBO.bind();
+    // sphereVAO.linkAttrib(sphereVBO, 0);
+    // sphereNormalVBO.bind();
+    // sphereVAO.linkAttrib(sphereNormalVBO, 1);
+
+    // sphereVAO.unbind();
+    // GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    // sphereEBO.unbind();
 
     ///////////////////////////////////////////////////////////////
     // CubeMap - SkyBox
@@ -372,15 +375,17 @@ int main()
             GL_CHECK(currentSphereShader->setVec3("lightPos", lightPos));
         }
     
-        GL_CHECK(sphereVAO.bind());
-        std::vector<unsigned int> &ind = maSphere.getIndices();
-        GL_CHECK(glDrawElements(GL_TRIANGLES,
-            ind.size(),
-            GL_UNSIGNED_INT,
-            (void*)0)
-        );
-        GL_CHECK(sphereVAO.unbind());
-        GL_CHECK(sphereEBO.unbind());
+        // GL_CHECK(sphereVAO.bind());
+        // std::vector<unsigned int> &ind = maSphere.getIndices();
+        // GL_CHECK(glDrawElements(GL_TRIANGLES,
+        //     ind.size(),
+        //     GL_UNSIGNED_INT,
+        //     (void*)0)
+        // );
+        // GL_CHECK(sphereVAO.unbind());
+        // GL_CHECK(sphereEBO.unbind());
+
+        maSphere.Draw(*currentSphereShader);
 
         //décalage de la surface
         glm::mat4 modelSurface = glm::mat4(1.0f);
@@ -440,7 +445,7 @@ int main()
         GL_CHECK(colorShader.setVec3("objectColor", 1.0f, 0.0f, 0.0f));
         GL_CHECK(rayTraced.renduRay());
 
-        
+
         /////////////////////
         // Rendu de la skybox 
         /////////////////////
@@ -512,10 +517,10 @@ int main()
     // de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
 
-    sphereVAO.del();
-    sphereVBO.del();
-    sphereNormalVBO.del();
-    sphereEBO.del();
+    // sphereVAO.del();
+    // sphereVBO.del();
+    // sphereNormalVBO.del();
+    // sphereEBO.del();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------

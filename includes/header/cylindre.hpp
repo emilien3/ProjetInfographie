@@ -1,5 +1,9 @@
 #pragma once
 
+// #pragma once
+// #include "header/object.hpp"
+// #include <cmath>
+
 #include <vector>
 #include <glm/glm.hpp>
 #include <glad/glad.h>
