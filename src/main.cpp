@@ -212,6 +212,12 @@ int main()
     Cube monCube;
     glm::mat4 modele = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
     monCube.setModelMatrix(modele);
+    
+    
+    Cube lightCube;
+    modele = glm::translate(glm::mat4(1.0f), lightPos);
+    lightCube.setModelMatrix(modele);
+
 
     VAO cubeVAO;
     VBO vbo(vertices, sizeof(vertices)); // utilisation du 1er constructeur
@@ -304,10 +310,6 @@ int main()
         GL_CHECK(glClearColor(0.2f, 0.4f, 0.8f, 1.0f));
         GL_CHECK(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-        // // render imgui windows
-        // ImGui_ImplOpenGL3_NewFrame();
-        // ImGui_ImplGlfw_NewFrame();
-
         //////////////////////////////////////////////////////////
         
         // MATRICES EN COMMUN
@@ -316,26 +318,24 @@ int main()
         glm::mat4 model = glm::mat4(1.0f);
         GL_CHECK(model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)));
 
-        // also draw the lamp object -> the smaller cube
+        ////////////////
+        // Per shader //
+        ////////////////
+
         lightCubeShader.use();
         lightCubeShader.setMat4("projection", projection);
         lightCubeShader.setMat4("view", view);
+
         glm::mat4 modelLight = glm::mat4(1.0f);
         modelLight = glm::translate(modelLight, lightPos);
-        modelLight = glm::scale(modelLight, glm::vec3(0.2f)); // a smaller cube
+        modelLight = glm::scale(modelLight, glm::vec3(0.2f));
+
         lightCubeShader.setMat4("model", modelLight);
-        // Rendu point de lumière
-        cubeVAO.bind();
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-        cubeVAO.unbind();
-        GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 
-        ////nvx cube 
-
+        lightCube.Draw(lightCubeShader);
         monCube.Draw(lightCubeShader);
 
-
-        ///////////////dessin de la sphère /////////////////////////
+        ///////////////////// dessin de la sphère /////////////////////////
         Shader* currentSphereShader; // Pointeur vers le shader à utiliser
 
         if (showNormalsMode) {
@@ -440,6 +440,7 @@ int main()
         GL_CHECK(colorShader.setVec3("objectColor", 1.0f, 0.0f, 0.0f));
         GL_CHECK(rayTraced.renduRay());
 
+        
         /////////////////////
         // Rendu de la skybox 
         /////////////////////
@@ -510,9 +511,6 @@ int main()
 
     // de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
-    cubeVAO.del();
-    vbo.del();
-    ebo.del();
 
     sphereVAO.del();
     sphereVBO.del();

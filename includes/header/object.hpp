@@ -37,6 +37,8 @@ class Objet3D
 
         glm::mat4 m_modelMatrix;
 
+        GLenum m_drawMode = GL_TRIANGLES;
+
         void setupMesh()
         {
             m_vao = std::make_unique<VAO>();
@@ -71,9 +73,9 @@ class Objet3D
             
             m_vao->bind();
             if (m_indices.empty()) {
-                glDrawArrays(GL_TRIANGLES, 0, static_cast<unsigned int>(m_vertices.size()));
+                glDrawArrays(m_drawMode, 0, static_cast<unsigned int>(m_vertices.size()));
             } else {
-                glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(m_indices.size()), GL_UNSIGNED_INT, 0);
+                glDrawElements(m_drawMode, static_cast<unsigned int>(m_indices.size()), GL_UNSIGNED_INT, 0);
             }            
             m_vao->unbind();
         }
