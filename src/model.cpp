@@ -30,8 +30,58 @@ void Model::processNode(aiNode *node, const aiScene *scene)
 
 Objet3D Model::processMesh(aiMesh *mesh, const aiScene *scene) 
 {
-        // C'est ici que nous allons convertir les données SoA (Struct of Arrays) d'Assimp
-        // vers votre format AoS (Array of Structs) pour remplir vos VAO/VBO.
+    std::vector<Vertex> vertices ;
+    
+    std::vector<unsigned int> m_indices;
+
+    for (int i = 0; i < mesh->mNumVertices; i++)
+    {
+        glm::vec3 pos;
+        pos.x = mesh->mVertices[i].x;
+        pos.y = mesh->mVertices[i].y;
+        pos.z = mesh->mVertices[i].z;
+        vertex.Position = pos;
+
+        if (mesh->HasNormals()) {
+            glm::vec3 normal;
+            normal.x = mesh->mNormals[i].x;
+            normal.y = mesh->mNormals[i].y;
+            normal.z = mesh->mNormals[i].z;
+            vertex.Normal = normal;
+        }
+
+        if (mesh->mTextureCoords[0])
+        {
+            glm::vec2 vec;
+
+            vec.x = mesh->mTextureCoords[0][i].x; 
+            vec.y = mesh->mTextureCoords[0][i].y;
+            vertex.TexCoords = vec;
+        }
+        else {
+            vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+        }
+
+        vertices.push_back(vertex);
+    }
+
+    for (int i = 0; i < mesh->mNumFaces; i++)
+    {
+        aiFace face = mesh->mFaces[i];
+
+        for(unsigned int j = 0; j < face.mNumIndices; j++)
+        {
+            m_indices.push_back(face.mIndices[j]);
+        }
+    }
+
+    Objet3D nouvelObjet;
+    
+    nouvelObjet.m_vertices = vertices;
+    nouvelObjet.m_indices = m_indices;
+    nouvelObjet.setupMesh(); 
+
+    return nouvelObjet;
 }
 
 void Draw(Shader &shader)
