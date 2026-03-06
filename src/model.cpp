@@ -1,6 +1,11 @@
 #include "header/model.hpp"
 #include <iostream>
 
+Model::Model(const std::string& path)
+{
+        loadModel(path);
+}
+
 void Model::loadModel(std::string const &path) 
 {
     Assimp::Importer importer;
@@ -10,32 +15,31 @@ void Model::loadModel(std::string const &path)
         return;
     }
     directory = path.substr(0, path.find_last_of('/'));
-    // Début du parcours du graphe de scène
+
     processNode(scene->mRootNode, scene);
 }
 
 void Model::processNode(aiNode *node, const aiScene *scene) 
 {
-    // 1. Traiter tous les maillages du nœud courant
     for(unsigned int i = 0; i < node->mNumMeshes; i++) {
-        // Le nœud ne contient que des indices, on va chercher l'objet réel dans la scène
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
         m_meshes.push_back(processMesh(mesh, scene));
     }
-    // 2. Traiter récursivement chaque enfant
+
     for(unsigned int i = 0; i < node->mNumChildren; i++) {
         processNode(node->mChildren[i], scene);
     }
 }
 
-Objet3D Model::processMesh(aiMesh *mesh, const aiScene *scene) 
+std::unique_ptr<Objet3D> Model::processMesh(aiMesh *mesh, const aiScene *scene) 
 {
     std::vector<Vertex> vertices ;
-    
-    std::vector<unsigned int> m_indices;
+    std::vector<unsigned int> indices;
 
     for (int i = 0; i < mesh->mNumVertices; i++)
     {
+        Vertex vertex;
+
         glm::vec3 pos;
         pos.x = mesh->mVertices[i].x;
         pos.y = mesh->mVertices[i].y;
@@ -71,20 +75,18 @@ Objet3D Model::processMesh(aiMesh *mesh, const aiScene *scene)
 
         for(unsigned int j = 0; j < face.mNumIndices; j++)
         {
-            m_indices.push_back(face.mIndices[j]);
+            indices.push_back(face.mIndices[j]);
         }
     }
 
-    Objet3D nouvelObjet;
-    
-    nouvelObjet.m_vertices = vertices;
-    nouvelObjet.m_indices = m_indices;
-    nouvelObjet.setupMesh(); 
+    auto nouvelObjet = std::make_unique<Objet3D>();
+    nouvelObjet->initFromAssimp(vertices, indices);
 
     return nouvelObjet;
 }
 
-void Draw(Shader &shader)
+void Model::Draw(Shader &shader)
 {
-
+    for(unsigned int i = 0; i < m_meshes.size(); i++)
+        m_meshes[i]->Draw(shader);
 }

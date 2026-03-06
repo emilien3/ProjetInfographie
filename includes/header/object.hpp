@@ -84,4 +84,11 @@ class Objet3D
         {
             m_modelMatrix = modelMatrix;
         }
+
+        void initFromAssimp(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
+        {
+            m_vertices = vertices;
+            m_indices = indices;
+            setupMesh(); 
+        }
 };

@@ -42,6 +42,8 @@
 #include "header/surfaceBezier.hpp"
 #include "header/sphere.hpp"
 
+#include "header/model.hpp"
+
 // #include "header/glfwWindow.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -164,6 +166,10 @@ int main()
     monCube.setModelMatrix(modele);
     
     Cube lightCube;
+
+    /// 3D object
+    Model monModeleTest("object/backpack/backpack.obj");
+
 
     ////////////////////// SHADERS /////////////////////////////
 
@@ -396,6 +402,17 @@ int main()
         
         GL_CHECK(colorShader.setVec3("objectColor", 1.0f, 0.0f, 0.0f));
         GL_CHECK(rayTraced.renduRay());
+
+        currentShader->use();
+        currentShader->setMat4("projection", projection);
+        currentShader->setMat4("view", view);
+
+        glm::mat4 modelMatrix = glm::mat4(1.0f);
+        modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -3.0f));
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
+        currentShader->setMat4("model", modelMatrix); 
+
+        monModeleTest.Draw(*currentShader);
 
 
         /////////////////////
