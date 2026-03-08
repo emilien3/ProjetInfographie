@@ -168,7 +168,8 @@ int main()
     Cube lightCube;
 
     /// 3D object
-    // Model monModeleTest("object/backpack/backpack.obj");
+    std::cout<<FileSystem::getPath("object/backpack/backpack.obj")<<std::endl;
+    Model monModeleTest(FileSystem::getPath("object/backpack/backpack.obj"));
     
     
     ////////////////////// SHADERS /////////////////////////////
@@ -354,6 +355,13 @@ int main()
         currentSphereShader->setMat4("model", modelSurface);
         
         maSurface.renduSurfaceBezier();
+
+
+        glm::mat4 modelMatrix = glm::mat4(1.0f);
+        modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -6.0f));
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
+        currentSphereShader->setMat4("model", modelMatrix); 
+        monModeleTest.Draw(*currentSphereShader);
         
         // CYLINDRE
         Shader* currentShader = &reflectionShader;
@@ -403,15 +411,6 @@ int main()
         
         GL_CHECK(colorShader.setVec3("objectColor", 1.0f, 0.0f, 0.0f));
         GL_CHECK(rayTraced.renduRay());
-
-        
-        // glm::mat4 modelMatrix = glm::mat4(1.0f);
-        // modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -3.0f));
-        // modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0f, 1.0f, 1.0f));
-        // colorShader.setMat4("model", modelMatrix); 
-
-        // monModeleTest.Draw(colorShader);
-
 
         /////////////////////
         // Rendu de la skybox 
