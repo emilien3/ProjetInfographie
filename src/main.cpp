@@ -246,6 +246,7 @@ int main()
     unsigned int cubemapTexture = my_sky_box.loadCubemap(faces);  
 
     float currentRefractionRatio = 1.00f / 1.52f;
+    glm::vec3 colorRefractionRatio = glm::vec3(1.0f);
 
     ////////////////////// IMGUI /////////////////////////////
 	IMGUI_CHECKVERSION();
@@ -371,6 +372,7 @@ int main()
         currentShader->use();
         GL_CHECK(currentShader->setVec3("cameraPos", camera.Position));
         GL_CHECK(currentShader->setFloat("refractionRatio", currentRefractionRatio));
+        GL_CHECK(currentShader->setVec3("color", colorRefractionRatio));
         
         // décalage du cylindre
         modelSurface = glm::mat4(1.0f);
@@ -461,6 +463,10 @@ int main()
 
         ImGui::Begin("Propriétés des Matériaux");
         ImGui::SliderFloat("Ratio Réfraction", &currentRefractionRatio, 0.42f, 1.0f);
+        ImGui::End();
+        
+        ImGui::Begin("Propriétés des Matériaux");
+        ImGui::ColorEdit3("Couleur refraction",glm::value_ptr(colorRefractionRatio));
         ImGui::End();
 
         ImGui::Render();
