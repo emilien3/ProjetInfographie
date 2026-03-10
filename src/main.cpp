@@ -11,7 +11,8 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/string_cast.hpp>
+
+// #include <glm/gtx/string_cast.hpp>
 
 //learnopengl libs
 #include <learnopengl/filesystem.h>
@@ -27,13 +28,22 @@
 #include "header/vbo.hpp"
 #include "header/ebo.hpp"
 
+#include "header/ray.hpp"
+#include "header/cylindre.hpp"
+#include "header/cubemap.hpp"
+
+#include "header/utils.hpp"
+
+// 3D Objects
+#include "header/cube.hpp"
+
 #include "header/controlPoint.hpp"
 #include "header/courbeBezier.hpp"
 #include "header/surfaceBezier.hpp"
 #include "header/sphere.hpp"
-#include "header/ray.hpp"
 
-#include "header/utils.hpp"
+#include "header/model.hpp"
+
 // #include "header/glfwWindow.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -45,8 +55,8 @@ void clear_callback(GLFWwindow* window, int key, int scancode, int action, int m
 void processInput(GLFWwindow *window, ray& rayTraced);
 
 // screen settings
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1280;
+const unsigned int SCR_HEIGHT = 720;
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -58,17 +68,28 @@ bool shiftMode = false;
 bool spacePressedLastFrame = false;
 bool showNormalsMode = false;
 bool N_KeyPressedLastFrame = false;
+bool W_KeyPressedLastFrame = false;
 
+bool showWireFrame = false;
 
 // timing
 float deltaTime = 0.0f;
 float lastFrame = 0.0f;
 
 // lighting
+
+std::vector<glm::vec3> lightPositions;
+std::vector<glm::vec3> lightColors;
+
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+
 
 //surface
 glm::vec3 surfacePos(-1.2f, 1.0f, -2.0f);
+glm::vec3 cylindrePos(-7.2f, 1.0f, -3.0f);
+glm::vec3 spherePos(-7.2f, 1.0f, -3.0f);
+glm::vec3 object1Pos(-7.2f, 1.0f, -3.0f);
+glm::vec3 object2Pos(-7.2f, 1.0f, -3.0f);
 
 int main()
 {
@@ -130,42 +151,48 @@ int main()
     initControlPoints3(liste3);
     initControlPoints4(liste4);
     
+    // courbes
     courbeBezier courbe1(liste3);
     courbeBezier courbe2(liste4);
     
+    // surface
     std::vector<glm::vec3> surface = concate2list(liste1, liste2);
     surfaceBezier maSurface(surface, liste1.size(), liste2.size(), 20, 20);
 
-    sphere maSphere(32, 16, 1.f);
+    // sphere
+    Sphere maSphere;
 
     // ray
     ray rayTraced;
 
-    // std::cout << "Type de surface : " << typeid(surface).name() << std::endl;
-    // for (auto &&i : surface)
-    // {
-    //     std::cout << i.x << i.y << i.z << std::endl; 
-    // }
+    // cylinder
+    Cylinder monCylindre;
 
-    // std::vector<glm::vec3> testing = maSurface.getControlPoint().getListPoint();
-    // std::cout << "Type de surface from object ma surface : " << typeid(surface).name() << std::endl;
-    // for (auto &&i : surface)
-    // {
-    //     std::cout << i.x << i.y << i.z << std::endl; 
-    // }
+    // cubes
+    Cube monCube;
+    glm::mat4 modele = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
+    monCube.setModelMatrix(modele);
+    
+    Cube lightCube;
 
+    /// 3D object
+    std::cout<<FileSystem::getPath("object/backpack/backpack.obj")<<std::endl;
+    Model monModeleTest(FileSystem::getPath("object/backpack/backpack.obj"));
+    
+    
     ////////////////////// SHADERS /////////////////////////////
-    // build and compile our shader zprogram
-    // ------------------------------------
+    
     Shader colorShader("../shaders/1.colors.vs", "../shaders/1.colors.fs");
     Shader lightCubeShader("../shaders/1.light_cube.vs", "../shaders/1.light_cube.fs");
     Shader newShader("../shaders/lighting.vs", "../shaders/lighting.fs");
     Shader normalsShader("../shaders/lighting.vs", "../shaders/normal.fs");
-    ////////////////////////////////////////////////////////////
-
+    
+    Shader skyboxShader("../shaders/skybox.vs", "../shaders/skybox.fs");
+    
+    Shader reflectionShader("../shaders/lighting.vs", "../shaders/reflection.fs");
+    Shader refractionShader("../shaders/lighting.vs", "../shaders/refraction.fs");
+    
     //////////////////////// DATA ////////////////////////////
-    // set up vertex data (and buffer(s)) and indices
-    // ------------------------------------------------------------------
 
     // points dans l'espace représentant un cube
     float vertices[] = {
@@ -180,7 +207,6 @@ int main()
         -0.5f,  0.5f,  0.5f, 
     };
 
-    //indices permettant de réutiliser les coord pour faire un cube et éviter les doublons de points
     int indices[]{
         0, 1, 2,
         2, 3, 0,
@@ -195,56 +221,40 @@ int main()
         3, 2, 6,
         6, 7, 3
     };
-    ////////////////////////////////////////////////////////////
 
-    ////////////////////// VAO, VBO, EBO ////////////////////////////
-
-    ////////////////////////////////////////////
-    //////////////// CUBE //////////////////////
-    ////////////////////////////////////////////
+    //////////////// CUBE 
 
     VAO cubeVAO;
     VBO vbo(vertices, sizeof(vertices)); // utilisation du 1er constructeur
     EBO ebo(indices, sizeof(indices));
+
     cubeVAO.bind();
     ebo.bind();
     cubeVAO.linkAttrib(vbo);
-    cubeVAO.unbind();
+    
     // unbind
+    cubeVAO.unbind();
     vbo.unbind();
     ebo.unbind();
 
-    //////////////////////////////////////////////
-    //////////////// SPHERE //////////////////////
-    //////////////////////////////////////////////
-
-    //////////// VERTICES ///////////////////
-    maSphere.renduSphere();
-
-    std::vector<glm::vec3>& sphereVertices = maSphere.getVertices();
-    std::vector<unsigned int>& sphereIndices = maSphere.getIndices();
-    std::vector<glm::vec3>& sphereNormals = maSphere.getNormales();
     
-    VAO sphereVAO;
-    VBO sphereVBO(sphereVertices, sphereVertices.size());
-    VBO sphereNormalVBO(sphereNormals, sphereNormals.size());
-    EBO sphereEBO(sphereIndices.data(), sphereIndices.size() * sizeof(unsigned int));
-    
-    sphereVAO.bind();
-    sphereEBO.bind();
-    
-    sphereVBO.bind();
-    sphereVAO.linkAttrib(sphereVBO, 0);
-    sphereNormalVBO.bind();
-    sphereVAO.linkAttrib(sphereNormalVBO, 1);
+    // CubeMap - SkyBox
 
-    sphereVAO.unbind();
-    GL_CHECK(glBindBuffer(GL_ARRAY_BUFFER, 0));
-    sphereEBO.unbind();
+    std::vector<std::string> faces
+    {
+        FileSystem::getPath("textures/skybox/right.jpg"),
+        FileSystem::getPath("textures/skybox/left.jpg"),
+        FileSystem::getPath("textures/skybox/top.jpg"),
+        FileSystem::getPath("textures/skybox/bottom.jpg"),
+        FileSystem::getPath("textures/skybox/front.jpg"),
+        FileSystem::getPath("textures/skybox/back.jpg")
+    };
 
-    ///////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////
+    Cubemap my_sky_box;
+    unsigned int cubemapTexture = my_sky_box.loadCubemap(faces);  
+
+    float currentRefractionRatio = 1.00f / 1.52f;
+    glm::vec3 colorRefractionRatio = glm::vec3(1.0f);
 
     ////////////////////// IMGUI /////////////////////////////
 	IMGUI_CHECKVERSION();
@@ -253,8 +263,8 @@ int main()
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 330");
-	///////////////////////////////////////////////////////////////
 
+    
     ////////////////////// RENDER LOOP ////////////////////////////
     // -----------
     while (!glfwWindowShouldClose(window))
@@ -271,12 +281,8 @@ int main()
 
         // render
         // ------
-        GL_CHECK(glClearColor(0.1f, 0.1f, 0.1f, 1.0f));
+        GL_CHECK(glClearColor(0.2f, 0.4f, 0.8f, 1.0f));
         GL_CHECK(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-
-        // render imgui windows
-        ImGui_ImplOpenGL3_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
 
         //////////////////////////////////////////////////////////
         
@@ -286,21 +292,23 @@ int main()
         glm::mat4 model = glm::mat4(1.0f);
         GL_CHECK(model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)));
 
-        // also draw the lamp object -> the smaller cube
+        ////////////////
+        // Per shader //
+        ////////////////
+
         lightCubeShader.use();
         lightCubeShader.setMat4("projection", projection);
         lightCubeShader.setMat4("view", view);
+
         glm::mat4 modelLight = glm::mat4(1.0f);
         modelLight = glm::translate(modelLight, lightPos);
-        modelLight = glm::scale(modelLight, glm::vec3(0.2f)); // a smaller cube
-        lightCubeShader.setMat4("model", modelLight);
-        // Rendu point de lumière
-        cubeVAO.bind();
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-        cubeVAO.unbind();
-        GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+        modelLight = glm::scale(modelLight, glm::vec3(0.2f));
+        lightCube.setModelMatrix(modelLight);
 
-        ///////////////dessin de la sphère /////////////////////////
+        lightCube.Draw(lightCubeShader);
+        monCube.Draw(lightCubeShader);
+
+        ///////////////////// dessin de la sphère /////////////////////////
         Shader* currentSphereShader; // Pointeur vers le shader à utiliser
 
         if (showNormalsMode) {
@@ -313,6 +321,7 @@ int main()
         // Envoyer les uniforms COMMUNES aux deux shaders
         GL_CHECK(currentSphereShader->setMat4("projection", projection));
         GL_CHECK(currentSphereShader->setMat4("view", view));
+
         GL_CHECK(currentSphereShader->setMat4("model", model));
         // Envoyer les uniforms SPÉCIFIQUES au shader Lambertien (si actif)
         if (!showNormalsMode) {
@@ -337,17 +346,18 @@ int main()
             GL_CHECK(currentSphereShader->setVec3("lightPos", lightPos));
         }
     
-        GL_CHECK(sphereVAO.bind());
-        std::vector<unsigned int> &ind = maSphere.getIndices();
-        GL_CHECK(glDrawElements(GL_TRIANGLES,
-            ind.size(),
-            GL_UNSIGNED_INT,
-            (void*)0)
-        );
-        GL_CHECK(sphereVAO.unbind());
-        GL_CHECK(sphereEBO.unbind());
+        // GL_CHECK(sphereVAO.bind());
+        // std::vector<unsigned int> &ind = maSphere.getIndices();
+        // GL_CHECK(glDrawElements(GL_TRIANGLES,
+        //     ind.size(),
+        //     GL_UNSIGNED_INT,
+        //     (void*)0)
+        // );
+        // GL_CHECK(sphereVAO.unbind());
+        // GL_CHECK(sphereEBO.unbind());
 
-        
+        maSphere.Draw(*currentSphereShader);
+
         //décalage de la surface
         glm::mat4 modelSurface = glm::mat4(1.0f);
         modelSurface = glm::translate(modelSurface, surfacePos);
@@ -355,7 +365,42 @@ int main()
         
         maSurface.renduSurfaceBezier();
 
-        ////////////////////Courbes, points de controles et rayons //////////////////////
+
+        glm::mat4 modelMatrix = glm::mat4(1.0f);
+        modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -6.0f));
+        modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
+        currentSphereShader->setMat4("model", modelMatrix); 
+        monModeleTest.Draw(*currentSphereShader);
+        
+        // CYLINDRE
+        Shader* currentShader = &reflectionShader;
+
+        currentShader = &refractionShader;
+        
+        currentShader->use();
+        GL_CHECK(currentShader->setVec3("cameraPos", camera.Position));
+        GL_CHECK(currentShader->setFloat("refractionRatio", currentRefractionRatio));
+        GL_CHECK(currentShader->setVec3("color", colorRefractionRatio));
+        
+        // décalage du cylindre
+        modelSurface = glm::mat4(1.0f);
+        modelSurface = glm::translate(modelSurface, -cylindrePos);
+        
+        monCylindre.setModelMatrix(modelSurface);
+        GL_CHECK(currentShader->setMat4("projection", projection));
+        GL_CHECK(currentShader->setMat4("view", view));
+        
+        glActiveTexture(GL_TEXTURE0);
+        my_sky_box.bind();
+        currentShader->setInt("skybox", 0);
+
+        monCylindre.Draw(*currentShader);
+
+
+        ////////////////////////////////////////////////////////////////////////////////
+        ////////////////////Courbes, points de controles et rayons /////////////////////
+        ////////////////////////////////////////////////////////////////////////////////
+
         // Color Shader param
         GL_CHECK(glPointSize(10.f));
         GL_CHECK(colorShader.use());
@@ -366,7 +411,7 @@ int main()
         GL_CHECK(colorShader.setMat4("model", model));
         GL_CHECK(colorShader.setVec3("lightColor", 1.0f, 1.0f, 1.0f));
 
-        GL_CHECK(colorShader.setVec3("objectColor", 1.0f, 1.0f, 0.0f));
+        GL_CHECK(colorShader.setVec3(" ", 1.0f, 1.0f, 0.0f));
         courbe1.renduPointControl();
         courbe2.renduPointControl();
 
@@ -377,7 +422,34 @@ int main()
         GL_CHECK(colorShader.setVec3("objectColor", 1.0f, 0.0f, 0.0f));
         GL_CHECK(rayTraced.renduRay());
 
-        //////////////////// IMGUI RENDERING ///////////////////////
+        /////////////////////
+        // Rendu de la skybox 
+        /////////////////////
+
+        glDepthFunc(GL_LEQUAL);
+        skyboxShader.use();
+
+        glm::mat4 view1 = glm::mat4(glm::mat3(camera.GetViewMatrix())); 
+        
+        skyboxShader.setMat4("view", view1);
+        skyboxShader.setMat4("projection", projection);
+        
+        cubeVAO.bind();
+
+        my_sky_box.bind();
+        glActiveTexture(GL_TEXTURE0);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        cubeVAO.unbind();
+        // GL_CHECK(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
+    
+        glDepthFunc(GL_LESS);
+
+        //Fin du rendu de la skybox
+
+        ///////////////////////////////////////////////////
+        //////////////////// IMGUI  ///////////////////////
+        ///////////////////////////////////////////////////
+
         ///// rendu de la fenetre
         // Dans la boucle de rendu (main.cpp) :
 
@@ -397,7 +469,14 @@ int main()
         ImGui::SliderInt("Resolution V", &maSurface.m, 2, 50);
         ImGui::End();
 
-        // Effectuez le rendu ImGui une seule fois
+        ImGui::Begin("Propriétés des Matériaux");
+        ImGui::SliderFloat("Ratio Réfraction", &currentRefractionRatio, 0.42f, 1.0f);
+        ImGui::End();
+        
+        ImGui::Begin("Propriétés des Matériaux");
+        ImGui::ColorEdit3("Couleur refraction",glm::value_ptr(colorRefractionRatio));
+        ImGui::End();
+
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
         ///////////////////////////////////////////////////////
@@ -415,14 +494,10 @@ int main()
 
     // de-allocate all resources once they've outlived their purpose:
     // ------------------------------------------------------------------------
+
     cubeVAO.del();
     vbo.del();
     ebo.del();
-
-    sphereVAO.del();
-    sphereVBO.del();
-    sphereNormalVBO.del();
-    sphereEBO.del();
 
     // glfw: terminate, clearing all previously allocated GLFW resources.
     // ------------------------------------------------------------------
@@ -432,9 +507,6 @@ int main()
     glfwTerminate();
     return 0;
 }
-///////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
 // ---------------------------------------------------------------------------------------------------------
@@ -474,9 +546,15 @@ void processInput(GLFWwindow *window, ray& rayTraced)
         std::cout << "Show Normals Mode: " << (showNormalsMode ? "ON" : "OFF") << std::endl;
     }
     N_KeyPressedLastFrame = N_CurrentlyPressed;
-
+    
+    // partie wireframe
+    bool W_CurrentlyPressed = (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS);
+    if (W_CurrentlyPressed && !W_KeyPressedLastFrame) {
+        showWireFrame = !showWireFrame; // Basculer le mode
+        std::cout << "Show WireFrame Mode: " << (showWireFrame ? "ON" : "OFF") << std::endl;
+    }
+    W_KeyPressedLastFrame = W_CurrentlyPressed;
 }
-
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
 // ---------------------------------------------------------------------------------------------
@@ -486,7 +564,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height)
     // height will be significantly larger than specified on retina displays.
     glViewport(0, 0, width, height);
 }
-
 
 // glfw: whenever the mouse moves, this callback is called
 // -------------------------------------------------------
