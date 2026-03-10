@@ -4,15 +4,19 @@ in vec2 TexCoords;
 in vec3 WorldPos;
 in vec3 Normal;
 
+#define MAX_LIGHTS 5
+
 // material parameters
 uniform vec3  albedo;
 uniform float metallic;
 uniform float roughness;
 uniform float ao;
 
+uniform int nbLight;
+
 // lights
-uniform std::vector<glm::vec3> lightPositions;
-uniform std::vector<glm::vec3> lightColors;
+uniform glm::vec3 lightPositions[MAX_LIGHTS];
+uniform glm::vec3 lightColors[MAX_LIGHTS];
 
 uniform vec3 camPos;
 
@@ -33,7 +37,7 @@ void main()
 	           
     // reflectance equation
     vec3 Lo = vec3(0.0);
-    for(int i = 0; i < lightPositions.size(); ++i) 
+    for(int i = 0; i < nbLight; ++i) 
     {
         // calculate per-light radiance
         vec3 L = normalize(lightPositions[i] - WorldPos);
