@@ -21,7 +21,7 @@ private:
     std::string directory;
 
     void loadModel(std::string const &path);
-    void processNode(aiNode *node, const aiScene *scene);
+    void processNode(aiNode *node, const aiScene *scene, glm::mat4 parentTransform);
     std::unique_ptr<Objet3D> processMesh(aiMesh *mesh, const aiScene *scene);
 
 };

@@ -16,18 +16,31 @@ void Model::loadModel(std::string const &path)
     }
     directory = path.substr(0, path.find_last_of('/'));
 
-    processNode(scene->mRootNode, scene);
+    processNode(scene->mRootNode, scene, glm::mat4(1.0f));
 }
 
-void Model::processNode(aiNode *node, const aiScene *scene) 
+void Model::processNode(aiNode *node, const aiScene *scene, glm::mat4 parentTransform) 
 {
+    aiMatrix4x4 aiMat = node->mTransformation;
+    glm::mat4 localTransform(
+        aiMat.a1, aiMat.b1, aiMat.c1, aiMat.d1,
+        aiMat.a2, aiMat.b2, aiMat.c2, aiMat.d2,
+        aiMat.a3, aiMat.b3, aiMat.c3, aiMat.d3,
+        aiMat.a4, aiMat.b4, aiMat.c4, aiMat.d4
+    );
+    glm::mat4 globalTransform = parentTransform * localTransform;
+
     for(unsigned int i = 0; i < node->mNumMeshes; i++) {
         aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-        m_meshes.push_back(processMesh(mesh, scene));
+
+        std::unique_ptr<Objet3D> objet = processMesh(mesh, scene);
+        objet->setModelMatrix(globalTransform);
+
+        m_meshes.push_back(std::move(objet));
     }
 
     for(unsigned int i = 0; i < node->mNumChildren; i++) {
-        processNode(node->mChildren[i], scene);
+        processNode(node->mChildren[i], scene, globalTransform);
     }
 }
 
