@@ -44,6 +44,8 @@
 
 #include "header/model.hpp"
 
+#include "stb_image.h"
+
 // #include "header/glfwWindow.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -53,6 +55,7 @@ void shift_callback(GLFWwindow* window, int key, int scancode, int action, int m
 void space_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void clear_callback(GLFWwindow* window, int key, int scancode, int action, int mods);
 void processInput(GLFWwindow *window, ray& rayTraced);
+unsigned int loadTexture(char const * path);
 
 // screen settings
 const unsigned int SCR_WIDTH = 1280;
@@ -78,11 +81,11 @@ float lastFrame = 0.0f;
 
 // lighting
 
-std::vector<glm::vec3> lightPositions;
-std::vector<glm::vec3> lightColors;
+// std::vector<glm::vec3> lightPositions;
+// std::vector<glm::vec3> lightColors;
 
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
-
+glm::vec3 lightCol(150.0f, 150.0f, 150.0f);
 
 //surface
 glm::vec3 surfacePos(-1.2f, 1.0f, -2.0f);
@@ -192,6 +195,25 @@ int main()
     Shader reflectionShader("../shaders/lighting.vs", "../shaders/reflection.fs");
     Shader refractionShader("../shaders/lighting.vs", "../shaders/refraction.fs");
     
+
+    Shader pbrShader("../shaders/pbr.vs", "../shaders/pbr.fs");
+    pbrShader.use();
+    pbrShader.setInt("nbLights", 1);
+    pbrShader.setInt("albedoMap", 0);
+    pbrShader.setInt("normalMap", 1);
+    pbrShader.setInt("metallicMap", 2);
+    pbrShader.setInt("roughnessMap", 3);
+    pbrShader.setInt("aoMap", 4);
+
+    // load PBR material textures
+    // --------------------------
+    unsigned int albedo    = loadTexture(FileSystem::getPath("textures/pbr/-ornatebrass3-bl/albedo.png").c_str());
+    unsigned int normal    = loadTexture(FileSystem::getPath("textures/pbr/-ornatebrass3-bl/normal.png").c_str());
+    unsigned int metallic  = loadTexture(FileSystem::getPath("textures/pbr/-ornatebrass3-bl/metallic.png").c_str());
+    unsigned int roughness = loadTexture(FileSystem::getPath("textures/pbr/-ornatebrass3-bl/roughness.png").c_str());
+    unsigned int ao        = loadTexture(FileSystem::getPath("textures/pbr/-ornatebrass3-bl/ao.png").c_str());
+
+
     //////////////////////// DATA ////////////////////////////
 
     // points dans l'espace représentant un cube
@@ -251,7 +273,7 @@ int main()
     };
 
     Cubemap my_sky_box;
-    unsigned int cubemapTexture = my_sky_box.loadCubemap(faces);  
+    unsigned int cubemapTexture = my_sky_box.loadCubemap(faces);
 
     float currentRefractionRatio = 1.00f / 1.52f;
     glm::vec3 colorRefractionRatio = glm::vec3(1.0f);
@@ -308,6 +330,31 @@ int main()
         lightCube.Draw(lightCubeShader);
         monCube.Draw(lightCubeShader);
 
+
+        pbrShader.use();
+        pbrShader.setMat4("projection", projection);
+        pbrShader.setMat4("view", view);
+        pbrShader.setVec3("camPos", camera.Position);
+
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, albedo);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, normal);
+        glActiveTexture(GL_TEXTURE2);
+        glBindTexture(GL_TEXTURE_2D, metallic);
+        glActiveTexture(GL_TEXTURE3);
+        glBindTexture(GL_TEXTURE_2D, roughness);
+        glActiveTexture(GL_TEXTURE4);
+        glBindTexture(GL_TEXTURE_2D, ao);
+
+
+        pbrShader.setMat4("model", model);
+        pbrShader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
+        pbrShader.setVec3("lightPositions[0]", lightPos);
+        pbrShader.setVec3("lightColors[0]", lightCol);
+        
+        maSphere.Draw(pbrShader);
+
         ///////////////////// dessin de la sphère /////////////////////////
         Shader* currentSphereShader; // Pointeur vers le shader à utiliser
 
@@ -330,8 +377,6 @@ int main()
             GL_CHECK(currentSphereShader->setVec3("lightPos", lightPos));
         }
 
-        modelLight = glm::translate(modelLight, lightPos);
-        
         //////////////////// sphere rendering ///////////////////////
         
         // Envoyer les uniforms COMMUNES aux deux shaders
@@ -345,18 +390,8 @@ int main()
             GL_CHECK(currentSphereShader->setVec3("lightColor",  1.0f, 1.0f, 1.0f));
             GL_CHECK(currentSphereShader->setVec3("lightPos", lightPos));
         }
-    
-        // GL_CHECK(sphereVAO.bind());
-        // std::vector<unsigned int> &ind = maSphere.getIndices();
-        // GL_CHECK(glDrawElements(GL_TRIANGLES,
-        //     ind.size(),
-        //     GL_UNSIGNED_INT,
-        //     (void*)0)
-        // );
-        // GL_CHECK(sphereVAO.unbind());
-        // GL_CHECK(sphereEBO.unbind());
 
-        maSphere.Draw(*currentSphereShader);
+        // maSphere.Draw(*currentSphereShader);
 
         //décalage de la surface
         glm::mat4 modelSurface = glm::mat4(1.0f);
@@ -471,9 +506,6 @@ int main()
 
         ImGui::Begin("Propriétés des Matériaux");
         ImGui::SliderFloat("Ratio Réfraction", &currentRefractionRatio, 0.42f, 1.0f);
-        ImGui::End();
-        
-        ImGui::Begin("Propriétés des Matériaux");
         ImGui::ColorEdit3("Couleur refraction",glm::value_ptr(colorRefractionRatio));
         ImGui::End();
 
@@ -612,4 +644,41 @@ void shift_callback(GLFWwindow* window, int key, int scancode, int action, int m
             shiftMode = false;
         }   
     }
+}
+
+unsigned int loadTexture(char const * path)
+{
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+
+    int width, height, nrComponents;
+    unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
+    if (data)
+    {
+        GLenum format;
+        if (nrComponents == 1)
+            format = GL_RED;
+        else if (nrComponents == 3)
+            format = GL_RGB;
+        else if (nrComponents == 4)
+            format = GL_RGBA;
+
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        stbi_image_free(data);
+    }
+    else
+    {
+        std::cout << "Texture failed to load at path: " << path << std::endl;
+        stbi_image_free(data);
+    }
+
+    return textureID;
 }
