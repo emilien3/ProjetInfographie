@@ -1,20 +1,19 @@
 #pragma once
 
-#include "header/controlPoint.hpp"
+#include <glm/glm.hpp>
 
-class Bone
-{
-private:
-    
-    glm::vec3 position;
+class Bone {
 
+    public:
 
-public:
-    Bone() = delete;
-    
-    Bone(glm::vec3 pos);
-
-    ~Bone(){};
-
+        int id;
+        glm::mat4 offsetMatrix;
+        glm::mat4 localTransform;
+        
+        Bone* parent; 
+        
+        Bone(int _id, glm::mat4 _offset) : id(_id), offsetMatrix(_offset), localTransform(1.0f), parent(nullptr) {}
+        
+        glm::mat4 getFinalMatrix() const;
 
 };

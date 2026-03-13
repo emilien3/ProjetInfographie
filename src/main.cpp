@@ -44,8 +44,6 @@
 
 #include "header/model.hpp"
 
-#include "stb_image.h"
-
 // #include "header/glfwWindow.hpp"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -178,9 +176,9 @@ int main()
     
     Cube lightCube;
 
-    /// 3D object
-    std::cout<<FileSystem::getPath("object/backpack/backpack.obj")<<std::endl;
-    Model monModeleTest(FileSystem::getPath("object/backpack/backpack.obj"));
+    // /// 3D object
+    // Model backpack(FileSystem::getPath("object/backpack/backpack.obj"));
+    // Model samurai(FileSystem::getPath("object/pbr_kabuto_samurai_helmet/scene.gltf"));
     
     
     ////////////////////// SHADERS /////////////////////////////
@@ -199,6 +197,7 @@ int main()
     Shader pbrShader("../shaders/pbr.vs", "../shaders/pbr.fs");
     pbrShader.use();
     pbrShader.setInt("nbLights", 1);
+
     pbrShader.setInt("albedoMap", 0);
     pbrShader.setInt("normalMap", 1);
     pbrShader.setInt("metallicMap", 2);
@@ -212,6 +211,12 @@ int main()
     unsigned int metallic  = loadTexture(FileSystem::getPath("textures/pbr/-ornatebrass3-bl/metallic.png").c_str());
     unsigned int roughness = loadTexture(FileSystem::getPath("textures/pbr/-ornatebrass3-bl/roughness.png").c_str());
     unsigned int ao        = loadTexture(FileSystem::getPath("textures/pbr/-ornatebrass3-bl/ao.png").c_str());
+
+    maSphere.m_material.albedoMap = albedo;
+    maSphere.m_material.normalMap = normal;
+    maSphere.m_material.metallicMap = metallic;
+    maSphere.m_material.roughnessMap = roughness;
+    maSphere.m_material.aoMap = ao;
 
 
     //////////////////////// DATA ////////////////////////////
@@ -335,25 +340,20 @@ int main()
         pbrShader.setMat4("projection", projection);
         pbrShader.setMat4("view", view);
         pbrShader.setVec3("camPos", camera.Position);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, albedo);
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, normal);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, metallic);
-        glActiveTexture(GL_TEXTURE3);
-        glBindTexture(GL_TEXTURE_2D, roughness);
-        glActiveTexture(GL_TEXTURE4);
-        glBindTexture(GL_TEXTURE_2D, ao);
-
-
-        pbrShader.setMat4("model", model);
-        pbrShader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
         pbrShader.setVec3("lightPositions[0]", lightPos);
+        pbrShader.setMat3("normalMatrix", glm::transpose(glm::inverse(glm::mat3(model))));
         pbrShader.setVec3("lightColors[0]", lightCol);
         
+        maSphere.setModelMatrix(model);
         maSphere.Draw(pbrShader);
+
+        glm::mat4 my_modelMatrix = glm::mat4(1.0f);
+        my_modelMatrix = glm::translate(my_modelMatrix, glm::vec3(0.0f, -1.0f, -6.0f)); 
+        my_modelMatrix = glm::scale(my_modelMatrix, glm::vec3(1.0f)); 
+
+        pbrShader.setMat4("model", my_modelMatrix);
+        // backpack.Draw(pbrShader);
+        // samurai.Draw(pbrShader);
 
         ///////////////////// dessin de la sphère /////////////////////////
         Shader* currentSphereShader; // Pointeur vers le shader à utiliser
@@ -391,8 +391,6 @@ int main()
             GL_CHECK(currentSphereShader->setVec3("lightPos", lightPos));
         }
 
-        // maSphere.Draw(*currentSphereShader);
-
         //décalage de la surface
         glm::mat4 modelSurface = glm::mat4(1.0f);
         modelSurface = glm::translate(modelSurface, surfacePos);
@@ -400,12 +398,10 @@ int main()
         
         maSurface.renduSurfaceBezier();
 
-
         glm::mat4 modelMatrix = glm::mat4(1.0f);
         modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -6.0f));
         modelMatrix = glm::scale(modelMatrix, glm::vec3(0.5f, 0.5f, 0.5f));
         currentSphereShader->setMat4("model", modelMatrix); 
-        monModeleTest.Draw(*currentSphereShader);
         
         // CYLINDRE
         Shader* currentShader = &reflectionShader;
@@ -644,41 +640,4 @@ void shift_callback(GLFWwindow* window, int key, int scancode, int action, int m
             shiftMode = false;
         }   
     }
-}
-
-unsigned int loadTexture(char const * path)
-{
-    unsigned int textureID;
-    glGenTextures(1, &textureID);
-
-    int width, height, nrComponents;
-    unsigned char *data = stbi_load(path, &width, &height, &nrComponents, 0);
-    if (data)
-    {
-        GLenum format;
-        if (nrComponents == 1)
-            format = GL_RED;
-        else if (nrComponents == 3)
-            format = GL_RGB;
-        else if (nrComponents == 4)
-            format = GL_RGBA;
-
-        glBindTexture(GL_TEXTURE_2D, textureID);
-        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        stbi_image_free(data);
-    }
-    else
-    {
-        std::cout << "Texture failed to load at path: " << path << std::endl;
-        stbi_image_free(data);
-    }
-
-    return textureID;
 }

@@ -39,3 +39,5 @@ void initControlPoints3(std::vector<glm::vec3> &points);
 void initControlPoints4(std::vector<glm::vec3> &points);
 
 std::vector<glm::vec3> concate2list(std::vector<glm::vec3> list1, std::vector<glm::vec3> list2);
+
+unsigned int loadTexture(char const * path);

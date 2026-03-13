@@ -1,4 +1,5 @@
 #include "header/model.hpp"
+#include "header/utils.hpp"
 #include <iostream>
 
 Model::Model(const std::string& path)
@@ -95,6 +96,35 @@ std::unique_ptr<Objet3D> Model::processMesh(aiMesh *mesh, const aiScene *scene)
     auto nouvelObjet = std::make_unique<Objet3D>();
     nouvelObjet->initFromAssimp(vertices, indices);
 
+    /////////////////////////////////////////////
+    // --- LECTURE GÉNÉRIQUE DES MATÉRIAUX --- //
+    /////////////////////////////////////////////
+
+    if(mesh->mMaterialIndex >= 0)
+    {
+        aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+
+        // Albedo (BASE_COLOR pour le glTF)
+        nouvelObjet->m_material.albedoMap = loadMaterialTexture(material, aiTextureType_BASE_COLOR, "albedo");
+        // Fallback si l'exportateur utilise l'ancien standard diffuse
+        if (nouvelObjet->m_material.albedoMap == 0) {
+            nouvelObjet->m_material.albedoMap = loadMaterialTexture(material, aiTextureType_DIFFUSE, "albedo");
+        }
+
+        // 2. Normales
+        nouvelObjet->m_material.normalMap = loadMaterialTexture(material, aiTextureType_NORMALS, "normal");
+
+        // 3. Metallic-Roughness (Souvent dans UNKNOWN pour le glTF)
+        nouvelObjet->m_material.metallicMap = loadMaterialTexture(material, aiTextureType_UNKNOWN, "metallicRoughness");
+        nouvelObjet->m_material.roughnessMap = loadMaterialTexture(material, aiTextureType_UNKNOWN, "metallicRoughness");
+
+        // 4. Occlusion Ambiante (Souvent dans LIGHTMAP ou AMBIENT)
+        nouvelObjet->m_material.aoMap = loadMaterialTexture(material, aiTextureType_LIGHTMAP, "ao");
+        if (nouvelObjet->m_material.aoMap == 0) {
+            nouvelObjet->m_material.aoMap = loadMaterialTexture(material, aiTextureType_AMBIENT, "ao");
+        }
+    }
+
     return nouvelObjet;
 }
 
@@ -102,4 +132,35 @@ void Model::Draw(Shader &shader)
 {
     for(unsigned int i = 0; i < m_meshes.size(); i++)
         m_meshes[i]->Draw(shader);
+}
+
+unsigned int Model::loadMaterialTexture(aiMaterial *mat, aiTextureType type, const std::string& typeName)
+{
+    aiString str;
+    if(mat->GetTexture(type, 0, &str) != AI_SUCCESS) {
+        return 0; 
+    }
+
+    bool skip = false;
+    unsigned int textureID = 0;
+
+    for(unsigned int j = 0; j < m_textures_loaded.size(); j++) {
+        if(std::strcmp(m_textures_loaded[j].path.data(), str.C_Str()) == 0) {
+            textureID = m_textures_loaded[j].id;
+            skip = true; 
+            break;
+        }
+    }
+
+    if(!skip)
+    {
+        TextureLoaded texture;
+        std::string fullPath = this->directory + "/" + str.C_Str();
+        textureID = loadTexture(fullPath.c_str());
+        texture.id = textureID;
+        texture.path = str.C_Str();
+        m_textures_loaded.push_back(texture);
+    }
+    
+    return textureID;
 }
