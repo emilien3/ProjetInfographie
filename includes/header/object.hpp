@@ -124,6 +124,52 @@ class Objet3D
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, 0);
         }
+        
+        virtual void Draw(Shader& shader, glm::mat4 parentMatrix) const {
+            
+            glm::mat4 finalMatrix = parentMatrix * m_modelMatrix;
+            shader.setMat4("model", finalMatrix);
+
+            // Binding de l'Albedo
+            
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, m_material.albedoMap);
+            shader.setInt("albedoMap", 0);
+            
+
+            // Binding de la Normal Map
+            
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, m_material.normalMap);
+            shader.setInt("normalMap", 1);
+            
+
+            //Binding de la carte Metallic/Roughness glTF
+            
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, m_material.metallicMap);
+            shader.setInt("metallicMap", 2);
+            
+            
+            glActiveTexture(GL_TEXTURE3);
+            glBindTexture(GL_TEXTURE_2D, m_material.roughnessMap);
+            shader.setInt("roughnessMap", 3);
+            
+            glActiveTexture(GL_TEXTURE4);
+            glBindTexture(GL_TEXTURE_2D, m_material.aoMap);
+            shader.setInt("aoMap", 4);
+            
+            m_vao->bind();
+            if (m_indices.empty()) {
+                glDrawArrays(m_drawMode, 0, static_cast<unsigned int>(m_vertices.size()));
+            } else {
+                glDrawElements(m_drawMode, static_cast<unsigned int>(m_indices.size()), GL_UNSIGNED_INT, 0);
+            }            
+            m_vao->unbind();
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, 0);
+        }
 
         void setModelMatrix(glm::mat4 modelMatrix)
         {

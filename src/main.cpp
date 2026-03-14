@@ -177,7 +177,7 @@ int main()
     Cube lightCube;
 
     // /// 3D object
-    // Model backpack(FileSystem::getPath("object/backpack/backpack.obj"));
+    Model backpack(FileSystem::getPath("object/backpack/backpack.obj"));
     // Model samurai(FileSystem::getPath("object/pbr_kabuto_samurai_helmet/scene.gltf"));
     
     
@@ -192,7 +192,8 @@ int main()
     
     Shader reflectionShader("../shaders/lighting.vs", "../shaders/reflection.fs");
     Shader refractionShader("../shaders/lighting.vs", "../shaders/refraction.fs");
-    
+    Shader skinningShader("../shaders/skinning.vs", "../shaders/refraction.fs");
+    Shader w_skinningShader("../shaders/skinning.vs", "../shaders/weight_shader.fs");
 
     Shader pbrShader("../shaders/pbr.vs", "../shaders/pbr.fs");
     pbrShader.use();
@@ -348,11 +349,11 @@ int main()
         maSphere.Draw(pbrShader);
 
         glm::mat4 my_modelMatrix = glm::mat4(1.0f);
-        my_modelMatrix = glm::translate(my_modelMatrix, glm::vec3(0.0f, -1.0f, -6.0f)); 
-        my_modelMatrix = glm::scale(my_modelMatrix, glm::vec3(1.0f)); 
+        my_modelMatrix = glm::translate(my_modelMatrix, glm::vec3(0.0f, -1.0f, 10.0f)); 
+        my_modelMatrix = glm::scale(my_modelMatrix, glm::vec3(0.5f)); 
 
-        pbrShader.setMat4("model", my_modelMatrix);
-        // backpack.Draw(pbrShader);
+        backpack.setModelMatrix(my_modelMatrix);
+        backpack.Draw(pbrShader);
         // samurai.Draw(pbrShader);
 
         ///////////////////// dessin de la sphère /////////////////////////
@@ -406,7 +407,9 @@ int main()
         // CYLINDRE
         Shader* currentShader = &reflectionShader;
 
-        currentShader = &refractionShader;
+        // currentShader = &refractionShader;
+        currentShader = &w_skinningShader;
+        currentShader = &skinningShader;
         
         currentShader->use();
         GL_CHECK(currentShader->setVec3("cameraPos", camera.Position));
@@ -420,7 +423,22 @@ int main()
         monCylindre.setModelMatrix(modelSurface);
         GL_CHECK(currentShader->setMat4("projection", projection));
         GL_CHECK(currentShader->setMat4("view", view));
-        
+
+        float time = static_cast<float>(glfwGetTime());
+
+        glm::mat4 bone0 = glm::mat4(1.0f);
+        glm::mat4 bone1 = glm::mat4(1.0f);
+
+        float articulationY = 0.0f;
+
+        bone1 = glm::translate(bone1, glm::vec3(0.0f, articulationY, 0.0f));
+
+        bone1 = glm::rotate(bone1, sin(time) * 1.5f, glm::vec3(1.0f, 0.0f, 0.0f)); 
+        bone1 = glm::translate(bone1, glm::vec3(0.0f, -articulationY, 0.0f));
+
+        currentShader->setMat4("finalBonesMatrices[0]", bone0);
+        currentShader->setMat4("finalBonesMatrices[1]", bone1);
+
         glActiveTexture(GL_TEXTURE0);
         my_sky_box.bind();
         currentShader->setInt("skybox", 0);

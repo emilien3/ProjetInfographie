@@ -41,3 +41,19 @@ void initControlPoints4(std::vector<glm::vec3> &points);
 std::vector<glm::vec3> concate2list(std::vector<glm::vec3> list1, std::vector<glm::vec3> list2);
 
 unsigned int loadTexture(char const * path);
+
+inline unsigned int Texture1x1(unsigned char r, unsigned char g, unsigned char b) {
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    
+    unsigned char data[] = { r, g, b, 255 }; // RGBA
+    // On envoie un seul pixel au GPU
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    
+    // Paramètres de filtrage basiques
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    
+    return textureID;
+}

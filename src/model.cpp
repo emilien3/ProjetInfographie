@@ -4,7 +4,11 @@
 
 Model::Model(const std::string& path)
 {
-        loadModel(path);
+    loadModel(path);
+}
+
+void Model::setModelMatrix(glm::mat4 modelMatrix) {
+    m_modelMatrix = modelMatrix;
 }
 
 void Model::loadModel(std::string const &path) 
@@ -96,9 +100,6 @@ std::unique_ptr<Objet3D> Model::processMesh(aiMesh *mesh, const aiScene *scene)
     auto nouvelObjet = std::make_unique<Objet3D>();
     nouvelObjet->initFromAssimp(vertices, indices);
 
-    /////////////////////////////////////////////
-    // --- LECTURE GÉNÉRIQUE DES MATÉRIAUX --- //
-    /////////////////////////////////////////////
 
     if(mesh->mMaterialIndex >= 0)
     {
@@ -116,6 +117,10 @@ std::unique_ptr<Objet3D> Model::processMesh(aiMesh *mesh, const aiScene *scene)
 
         // 3. Metallic-Roughness (Souvent dans UNKNOWN pour le glTF)
         nouvelObjet->m_material.metallicMap = loadMaterialTexture(material, aiTextureType_UNKNOWN, "metallicRoughness");
+
+        static unsigned int defaultMetallic = Texture1x1(0, 0, 0); 
+        nouvelObjet->m_material.metallicMap = defaultMetallic;
+
         nouvelObjet->m_material.roughnessMap = loadMaterialTexture(material, aiTextureType_UNKNOWN, "metallicRoughness");
 
         // 4. Occlusion Ambiante (Souvent dans LIGHTMAP ou AMBIENT)
@@ -131,7 +136,7 @@ std::unique_ptr<Objet3D> Model::processMesh(aiMesh *mesh, const aiScene *scene)
 void Model::Draw(Shader &shader)
 {
     for(unsigned int i = 0; i < m_meshes.size(); i++)
-        m_meshes[i]->Draw(shader);
+        m_meshes[i]->Draw(shader, m_modelMatrix);
 }
 
 unsigned int Model::loadMaterialTexture(aiMaterial *mat, aiTextureType type, const std::string& typeName)
