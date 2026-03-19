@@ -6,6 +6,13 @@ VBO::VBO(){
     glGenBuffers(1, &id);
 }
 
+VBO::VBO(const void* data, size_t sizeInBytes)
+{
+    glGenBuffers(1, &id);
+    bind();
+    glBufferData(GL_ARRAY_BUFFER, sizeInBytes, data, GL_STATIC_DRAW);
+}
+
 VBO::VBO(const float *vertices, size_t size)
 {
     glGenBuffers(1, &id);

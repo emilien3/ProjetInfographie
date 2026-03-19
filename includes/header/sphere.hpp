@@ -1,47 +1,34 @@
+#pragma once
+
+
 #include <glm/trigonometric.hpp>
 #include <glm/vec3.hpp>
 
 #include <iostream>
 
-class sphere
+#include "header/object.hpp"
+#include <cmath>
+
+class Sphere : public Objet3D
 {
-private:
-    float radius;
+    private:
 
-    float sectorStep;
-    float stackStep;
+        float radius;
+        int sectorCount;
+        int stackCount;
 
-    int sectorCount;
-    int stackCount;
+    public:
+        // sphere(int mySectorCount, int myStackCount, float myRadius);
 
-    float sectorAngle;
-    float stackAngle;
+        Sphere(int sectorCount = 36, int stackCount = 16, float radius = 1.0f) 
+            : radius(radius), sectorCount(sectorCount), stackCount(stackCount)
+        {
+            buildSphere();
+        }
 
-    std::vector<glm::vec3> vertices;
-    std::vector<glm::vec3> normales;
+        ~Sphere() override = default;
 
+        void buildSphere();
 
-    std::vector<unsigned int> indices;
-    std::vector<int> lineIndices;
-
-    // VAO vao;
-    // VBO vbo;
-    // EBO ebo;
-
-
-public:
-    sphere(int mySectorCount, int myStackCount, float myRadius);
-    ~sphere();
-
-    void renduSphere();
-    void updateIndices();
-
-    std::vector<glm::vec3>& getVertices();
-    std::vector<glm::vec3>& getNormales();
-
-    std::vector<unsigned int>& getIndices();
-    std::vector<int>& getLineIndices();
-
-    int getIndicesSize();
 };
 

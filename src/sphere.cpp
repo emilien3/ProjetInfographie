@@ -1,64 +1,45 @@
 #include "header/sphere.hpp"
-#include <math.h>
 
-sphere::sphere(int mySectorCount, int myStackCount, float myRadius)
+void Sphere::buildSphere()
 {
-    radius = myRadius;
-    sectorCount = mySectorCount;
-    stackCount = myStackCount;
+    float x, y, z, xy;
+    float nx, ny, nz, lengthNorm = 1.0f / radius;
+    float s, t; // Coordonnées UV
+    float sectorStep = 2 * M_PI / sectorCount;
+    float stackStep = M_PI / stackCount;
+    float sectorAngle, stackAngle;
 
-    renduSphere();
-
-}
-
-sphere::~sphere()
-{
-}
-
-void sphere::renduSphere()
-{
-    vertices.clear();
-    normales.clear();
-    
-    indices.clear();
-    lineIndices.clear();
-
-    float z, xy, x, y;
-    float nx, ny, nz, lengthNorm = 1.0f/radius;
-
-    sectorStep = 2* M_PI /sectorCount;
-    stackStep = M_PI /stackCount;
-
-    for (int i = 0; i <= stackCount; ++i)
-    {
+    for (int i = 0; i <= stackCount; ++i) {
         
-        stackAngle = M_PI / 2 - i * stackStep;  // starting from pi/2 to -pi/2
+        stackAngle = M_PI / 2.0f - i * stackStep; // de pi/2 à -pi/2
         z = radius * sinf(stackAngle);
         nz = z * lengthNorm;
         xy = radius * cosf(stackAngle);
         
-        for (int j = 0; j <= sectorCount; ++j)
-        {
+        for (int j = 0; j <= sectorCount; ++j) {
+
             sectorAngle = j * sectorStep;
 
-            // Vertex position
+            // Position cartésienne
             x = xy * cosf(sectorAngle);
             y = xy * sinf(sectorAngle);
-            vertices.push_back(glm::vec3(x, y, z));
-
-            // normalized vertex normal (nx, ny, nz)
+            
+            // Normale normalisée
             nx = x * lengthNorm;
             ny = y * lengthNorm;
-            normales.push_back(glm::vec3(nx, ny, nz));
+            
+            // Coordonnées de texture UV
+            s = (float)j / sectorCount;
+            t = (float)i / stackCount;
 
+            Vertex vertex;
+            vertex.Position = glm::vec3(x, y, z);
+            vertex.Normal = glm::vec3(nx, ny, nz);
+            vertex.TexCoords = glm::vec2(s, t);
+            m_vertices.push_back(vertex);
         }
     }
-    updateIndices();
-}
 
-
-void sphere::updateIndices()
-{
     unsigned int k1, k2;
 
     for (int i = 0; i < stackCount; ++i)
@@ -68,51 +49,22 @@ void sphere::updateIndices()
 
         for (int j = 0; j < sectorCount; ++j, ++k1, ++k2)
         {
-            if (i!=0)
+            if (i != 0)
             {
-                indices.push_back(k1);
-                indices.push_back(k2);
-                indices.push_back(k1+1);
+                m_indices.push_back(k1);
+                m_indices.push_back(k2);
+                m_indices.push_back(k1 + 1);
             }
-            if (i != (stackCount-1)) 
+
+            if (i != (stackCount - 1)) 
             {
-                indices.push_back(k1+1);
-                indices.push_back(k2);
-                indices.push_back(k2+1);
-            }
-            lineIndices.push_back(k1);
-            lineIndices.push_back(k2);
-            if (i!=0)
-            {
-                lineIndices.push_back(k1);
-                lineIndices.push_back(k1+1);
+                m_indices.push_back(k1 + 1);
+                m_indices.push_back(k2);
+                m_indices.push_back(k2 + 1);
             }
         }
     }
-}
 
-
-std::vector<glm::vec3>& sphere::getVertices()
-{
-    return vertices;
-}
-
-std::vector<glm::vec3>& sphere::getNormales()
-{
-    return normales;
-}
-
-std::vector<unsigned int>& sphere::getIndices()
-{
-    return indices;
-}
-
-std::vector<int>& sphere::getLineIndices()
-{
-    return lineIndices;
-}
-
-int sphere::getIndicesSize()
-{
-    return indices.size();
+    // Appel à la fonction de la classe parente pour initialiser VAO/VBO/EBO 
+    setupMesh();
 }
