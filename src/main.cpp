@@ -88,7 +88,7 @@ glm::vec3 lightCol(150.0f, 150.0f, 150.0f);
 //surface
 glm::vec3 surfacePos(-1.2f, 1.0f, -2.0f);
 glm::vec3 cylindrePos(-7.2f, 1.0f, -3.0f);
-glm::vec3 spherePos(-7.2f, 1.0f, -3.0f);
+glm::vec3 spherePos(-7.2f, -5.0f, -3.0f);
 glm::vec3 object1Pos(-7.2f, 1.0f, -3.0f);
 glm::vec3 object2Pos(-7.2f, 1.0f, -3.0f);
 
@@ -157,8 +157,8 @@ int main()
     courbeBezier courbe2(liste4);
     
     // surface
-    std::vector<glm::vec3> surface = concate2list(liste1, liste2);
-    surfaceBezier maSurface(surface, liste1.size(), liste2.size(), 20, 20);
+    // std::vector<glm::vec3> surface = concate2list(liste1, liste2);
+    // surfaceBezier maSurface(surface, liste1.size(), liste2.size(), 20, 20);
 
     // sphere
     Sphere maSphere;
@@ -247,16 +247,14 @@ int main()
         6, 7, 3
     };
 
-    //////////////// CUBE 
+    //////////////// CUBE pour Skybox
 
     VAO cubeVAO;
     VBO vbo(vertices, sizeof(vertices)); // utilisation du 1er constructeur
     EBO ebo(indices, sizeof(indices));
-
     cubeVAO.bind();
     ebo.bind();
     cubeVAO.linkAttrib(vbo);
-    
     // unbind
     cubeVAO.unbind();
     vbo.unbind();
@@ -345,7 +343,9 @@ int main()
         maSphere.Draw(pbrShader);
 
         glm::mat4 my_modelMatrix = glm::mat4(1.0f);
-        my_modelMatrix = glm::translate(my_modelMatrix, glm::vec3(0.0f, -1.0f, 10.0f)); 
+        // my_modelMatrix = glm::translate(my_modelMatrix, glm::vec3(0.0f, -1.0f, -5.0f)); 
+        my_modelMatrix = glm::translate(my_modelMatrix, surfacePos);
+        // my_modelMatrix = glm::rotate(my_modelMatrix, glm::radians(3.14159f), glm::vec3(0, 1, 0));
         my_modelMatrix = glm::scale(my_modelMatrix, glm::vec3(0.5f)); 
 
         backpack.setModelMatrix(my_modelMatrix);
@@ -390,10 +390,9 @@ int main()
 
         //décalage de la surface
         glm::mat4 modelSurface = glm::mat4(1.0f);
-        modelSurface = glm::translate(modelSurface, surfacePos);
-        currentSphereShader->setMat4("model", modelSurface);
-        
-        maSurface.renduSurfaceBezier();
+        // modelSurface = glm::translate(modelSurface, surfacePos);
+        // currentSphereShader->setMat4("model", modelSurface);
+        // maSurface.renduSurfaceBezier();
 
         glm::mat4 modelMatrix = glm::mat4(1.0f);
         modelMatrix = glm::translate(modelMatrix, glm::vec3(0.0f, 0.0f, -6.0f));
@@ -402,9 +401,8 @@ int main()
         
         // CYLINDRE
         Shader* currentShader = &reflectionShader;
-
         // currentShader = &refractionShader;
-        currentShader = &w_skinningShader;
+        // currentShader = &w_skinningShader;
         currentShader = &skinningShader;
         
         currentShader->use();
@@ -509,10 +507,6 @@ int main()
         ImGui::SliderInt("Points Courbe 2", &courbe2.nbpoints, 2, 30);
         ImGui::End();
 
-        ImGui::Begin("Surface Settings");
-        ImGui::SliderInt("Resolution U", &maSurface.n, 2, 50);
-        ImGui::SliderInt("Resolution V", &maSurface.m, 2, 50);
-        ImGui::End();
 
         ImGui::Begin("Propriétés des Matériaux");
         ImGui::SliderFloat("Ratio Réfraction", &currentRefractionRatio, 0.42f, 1.0f);
