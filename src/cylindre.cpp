@@ -49,15 +49,10 @@ void Cylinder::buildCylinder()
     for(auto& vertex : m_vertices) {
         float y = vertex.Position.y;
         
-        // On normalise la hauteur (0.0 à la base, 1.0 au sommet)
         float factor = (y - yMin) / (yMax - yMin);
         
-        // On assigne les IDs de nos deux os
         vertex.BoneIDs = glm::ivec2(0, 1);
         
-        // L'os 0 (Base) influence surtout le bas
-        // L'os 1 (Milieu) influence surtout le haut
-        // La somme des deux poids DOIT être égale à 1.0
         vertex.Weights[0] = 1.0f - factor;
         vertex.Weights[1] = factor;
     }

@@ -170,9 +170,6 @@ int main()
     Cylinder monCylindre;
 
     // cubes
-    Cube monCube;
-    glm::mat4 modele = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -3.0f));
-    monCube.setModelMatrix(modele);
     
     Cube lightCube;
 
@@ -334,7 +331,6 @@ int main()
         lightCube.setModelMatrix(modelLight);
 
         lightCube.Draw(lightCubeShader);
-        monCube.Draw(lightCubeShader);
 
 
         pbrShader.use();
