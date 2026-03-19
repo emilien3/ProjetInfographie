@@ -1,5 +1,9 @@
 #include "header/bone.hpp"
 
-Bone::Bone(glm::vec3 pos){
-
+glm::mat4 Bone::getFinalMatrix() const 
+{
+    if (parent) {
+        return parent->getFinalMatrix() * localTransform * offsetMatrix;
+    }
+    return localTransform * offsetMatrix;
 }

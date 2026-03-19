@@ -43,5 +43,22 @@ void Cylinder::buildCylinder()
         }
     }
 
+    float yMin = -length/2.0f;
+    float yMax = length/2.0f;
+
+    for(auto& vertex : m_vertices) {
+        float y = vertex.Position.y;
+        
+        float factor = (y - yMin) / (yMax - yMin);
+        
+        vertex.BoneIDs = glm::ivec2(0, 1);
+        
+        vertex.Weights[0] = 1.0f - factor;
+        vertex.Weights[1] = factor;
+    }
+
+    // Seulement APRÈS avoir rempli ces données, tu appelles :
+    // setupMesh();
+
     setupMesh();
 }

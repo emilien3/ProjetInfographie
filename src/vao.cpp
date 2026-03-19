@@ -32,6 +32,13 @@ void VAO::linkAttrib(VBO& vbo, GLuint layoutLocation, GLint components, GLenum t
     glEnableVertexAttribArray(layoutLocation);
 }
 
+void VAO::linkAttribInt(VBO& vbo, GLuint layoutLocation, GLint components, GLenum type, GLsizeiptr stride, const void* offset)
+{
+    vbo.bind();
+    glVertexAttribIPointer(layoutLocation, components, type, stride, offset);
+    glEnableVertexAttribArray(layoutLocation);
+}
+
 
 void VAO::bind(){
     glBindVertexArray(id);

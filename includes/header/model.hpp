@@ -11,17 +11,32 @@
 #include <iostream>
 
 #include "header/object.hpp"
+
+struct TextureLoaded {
+    unsigned int id;
+    std::string path;
+};
+
 class Model {
 public:
+
+
+    std::vector<TextureLoaded> m_textures_loaded;
     Model(const std::string& path);
     void Draw(Shader &shader); 
 
+    void setModelMatrix(glm::mat4 modelMatrix);
+
 private:
+    
+    glm::mat4 m_modelMatrix = glm::mat4(1.0f);
     std::vector<std::unique_ptr<Objet3D>> m_meshes;
     std::string directory;
 
     void loadModel(std::string const &path);
     void processNode(aiNode *node, const aiScene *scene, glm::mat4 parentTransform);
     std::unique_ptr<Objet3D> processMesh(aiMesh *mesh, const aiScene *scene);
+    
+    unsigned int loadMaterialTexture(aiMaterial *mat, aiTextureType type, const std::string& typeName);
 
 };
