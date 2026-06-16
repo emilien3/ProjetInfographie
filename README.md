@@ -1,9 +1,8 @@
 # ProjetInfographie
 
 This project take place during the second semester of my first year of master.
-The purpose was to ...
-
-
+The purpose was to create an interactive interface using gpu rendering (OpenGl).
+The project is transitioning to Vulkan.
 
 
 # learnopengl.com code repository
